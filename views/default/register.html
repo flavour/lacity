@@ -1,0 +1,14 @@
+{{extend "layout.html"}}
+<div id='home'>
+{{if "type" in request.vars and request.vars.type == "don":}}
+<h1>{{=T("Register your Corporation/Organization")}}</h1>
+<p>{{=XML(T("As a Registered %(give2la)s Corporation/Organization, you will receive Situation Awareness Reports from the City of Los Angeles Business Operations Center (BOC) in the event of a declared local emergency.  The BOC provides businesses, organizations, and community stakeholders with a direct voice and representation inside the City of Los Angeles Emergency Operations Center.  We encourage you to participate and have your interest represented.")  % dict(give2la = "<b>Give2<em>LA</i></b>"))}}</p>
+{{else:}}
+<h1>{{=T("Register your Organization")}}</h1>
+{{pass}}
+<h2 class='paper-strip'>{{=T("Profile")}}</h2>
+{{include "key.html"}}
+<div class='form-container'>
+{{=form}}
+</div>
+</div>

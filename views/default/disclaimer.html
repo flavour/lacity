@@ -1,0 +1,13 @@
+{{extend "layout.html"}}
+<div id='home'>
+<h1>{{=T("Disclaimer")}}</h1>
+<h2 class='paper-strip'>{{=T("Give2LA Policy")}}</h2>
+<p>{{=T("The City of Los Angeles is neither responsible nor liable for any viruses or other contamination of your system nor for any delays, inaccuracies, errors or omissions arising out of your use of the Site or with respect to the material contained on the Site, including without limitation, any material posted on the Site. This site and all materials contained on it are distributed and transmitted \"as is\" without warranties of any kind, either express or implied, including without limitation, warranties of title or implied warranties of merchantability or fitness for a particular purpose. The City of Los Angeles is not responsible for any special, indirect, incidental or consequential damages that may arise from the use of, or the inability to use, the site and/or the materials contained on the site whether the materials contained on the site are provided by the City of Los Angeles, or a third party")}}</p>
+<h2 id="privacy" class='paper-strip'>{{=T("Privacy Policy")}}</h2>
+{{=P(XML(T("%(give2la)s collects Personally Identifiable information (PII) that includes Name, Address, Email address and Telephone number. The City will make every reasonable effort to protect your privacy. It restricts access to your personal identifiable information to those employees that will respond to your request. The City does not intentionally disclose any personal information about our users to any third parties inside or outside the City except as required by law.") % dict(give2la = "<strong>Give2<em>LA</em></strong>")))}}
+{{=P(T("The City only collects personally identifiable information that is required to provide service. You can decline to provide us with any personal information on any site on the Internet at any time. However, if you should choose to withhold requested information, we may not be able to provide you with the online services dependent upon the collection of that information."))}}
+<p>{{=T("A more comprehensive privacy policy for the city of Los Angeles can be found at")}}
+<a href="http://disclaimer.lacity.org/privacy.htm">http://disclaimer.lacity.org/privacy.htm</a>
+</p>
+{{=P(T("Non-city web sites may be linked through the City's web site. Many non-city sites may or may not be subject to the Public Records Act and may or may not be subject to other sections of California Code or federal law. Visitors to such sites are advised to check the privacy statements of such sites and to be cautious about providing personally identifiable information without a clear understanding of how the information will be used."))}} 
+</div>

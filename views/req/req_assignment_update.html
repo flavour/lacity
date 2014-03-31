@@ -1,0 +1,33 @@
+{{extend "layout.html"}}
+{{try:}}
+ {{=H1(title)}}
+{{except:}}
+{{pass}}
+<div id='rheader'>
+{{try:}}
+ {{=rheader}}
+ </div>
+ {{if s3_has_role(STAFF) or db.vol_assignment.task_evaluation.readable == True:}}
+ <div id='component'>
+ {{else:}}
+ <div>
+ {{pass}}
+{{except:}}
+<div>
+ {{pass}}
+ {{if s3_has_role(STAFF) or db.vol_assignment.task_evaluation.readable == True:}}
+    {{try:}}
+	 {{=H2(subtitle, _class="paper-strip")}}
+	{{except:}}
+	{{pass}}
+	<div id='map'></div>
+	{{include "last_update.html"}}
+	{{include "key.html"}}
+	<div class='form-container'>
+	{{try:}}
+	 {{=form}}
+	{{except:}}
+	{{pass}}
+  {{pass}}
+	</div>
+</div>

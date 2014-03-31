@@ -1,0 +1,10 @@
+{{extend "layout.html"}}
+<h1>{{=T("My Profile")}}</h1>
+{{if not s3_has_role(STAFF):}}
+<p>{{=T("Please make sure we have your accurate information.  If you have personal information has changed, please update your profile.  This will ensure you receive new volunteer opportunities and information.")}}</p>
+{{pass}}
+<h2 class='paper-strip'>{{=T("Update Profile")}}</h2>
+{{include "key.html"}}
+<div class='form-container'>
+{{=form}}
+</div>

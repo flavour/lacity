@@ -1,0 +1,19 @@
+{{try:}}
+ {{=H1(title)}}
+{{except:}}
+{{pass}}
+{{try:}}
+ {{=H2(subtitle, _class="paper-strip")}}
+{{except:}}
+{{pass}}
+{{include "key.html"}}
+<div class='form-container'>
+{{try:}}
+ {{=form}}
+{{except:}}
+{{pass}}
+</div>
+{{try:}}
+ {{=list_btn}}
+{{except:}}
+{{pass}}

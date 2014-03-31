@@ -1,0 +1,9 @@
+{{extend "layout.html"}}
+<div id='home'>
+<h1>{{=response.title}}</h1>
+{{for entry in entries:}}
+   <h2 class='paper-strip'>{{=XML(entry[0])}}</h2>
+   <p>{{=XML(entry[1])}}<p>
+{{pass}}
+
+</div>

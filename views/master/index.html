@@ -1,0 +1,17 @@
+{{extend "layout.html"}}
+<div id='home'>
+<h2>{{=T("Master Data")}}</h2>
+<ul>
+<li><a href='{{=URL(r=request, c="event", f="event")}}'>{{=T("Events")}}</a></li>
+<li><a href='{{=URL(r=request, c="event", f="incident")}}'>{{=T("Incidents")}}</a></li>
+<li><a href='{{=URL(r=request, c="org", f="organisation")}}'>{{=T("Organizations")}}</a></li>
+<li><a href='{{=URL(r=request, c="hrm", f="human_resource")}}'>{{=T("Staff")}}</a></li>
+<li><a href='{{=URL(r=request, c="org", f="office")}}'>{{=T("Facilities")}}</a></li>
+<li><a href='{{=URL(r=request, c="hrm", f="skill")}}'>{{=T("Skills")}}</a></li>
+<li><a href='{{=URL(r=request, c="supply", f="item_category")}}'>{{=T("Resource Categories")}}</a></li>
+<li><a href='{{=URL(r=request, c="supply", f="item", vars = dict(item="goods"))}}'>{{=T("Goods")}}</a></li>
+<li><a href='{{=URL(r=request, c="supply", f="item", vars = dict(item="services"))}}'>{{=T("Services")}}</a></li>
+<li><a href='{{=URL(r=request, c="supply", f="item", vars = dict(item="facilities"))}}'>{{=T("Facility Types")}}</a></li>
+<li><a href='{{=URL(r=request, c="admin", f="user")}}'>{{=T("Users")}}</a></li>
+</ul>
+</div>

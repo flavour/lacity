@@ -1,0 +1,9 @@
+{{extend "layout.html"}}
+<div id='home'>
+<h1>{{=T("Volunteers")}}</h1>
+<ul>
+<li><a href='{{=URL(r=request, c="vol", f="req_skill")}}'>{{=T("Requests for Volunteers")}}</a></li>
+<li><a href='{{=URL(r=request, c="vol", f="person")}}'>{{=T("Volunteer List")}}</a></li>
+<li><a href='{{=URL(r=request, c="vol", f="activity")}}'>{{=T("Completed Activities")}}</a></li>
+</ul>
+</div>

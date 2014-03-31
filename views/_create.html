@@ -1,0 +1,28 @@
+{{try:}}
+ {{=H1(title)}}
+{{except:}}
+{{pass}}
+{{try:}}
+{{=shn_ocr_buttons(r)}}
+{{except:}}
+{{pass}}
+<div id='rheader'>
+{{try:}}
+ {{=XML(rheader)}}
+ </div>
+ <div id='component'>
+{{except:}}
+<div>
+ {{pass}}
+	{{include "key.html"}}
+	{{try:}}
+	 {{=H2(subtitle, _class="paper-strip")}}
+	{{except:}}
+	{{pass}}
+	<div class='form-container'>
+	{{try:}}
+	 {{=form}}
+	{{except:}}
+	{{pass}}
+	</div>
+</div>

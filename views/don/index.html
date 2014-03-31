@@ -1,0 +1,78 @@
+{{extend "layout.html"}}
+<div class='corner-right-box'>
+    <h3 class='crb-title'>{{=T("Corporations and Organizations")}}</h3>
+    <hr>
+    {{if s3_has_role(ORG_DON):}}
+    <p>{{=XML(T("Update the list of items which you are willing to Donate in the event of an emergency"))}}
+    <br/><strong><a id="don_register" href='{{=URL(f="organisation", args=[auth.user.organisation_id, "inv_item"], vars={"type":"items"})}}'>{{=T("PROFILE")}}</a></strong></p>
+    {{else:}}
+    <p>
+    {{=XML(T("Register with %(give2la)s to support the City of Los Angeles") % dict(give2la = "<strong>Give2<em>LA</em></strong>"))}}
+    <br/><strong><a id="don_register" href='{{=URL(c="default", f="register", vars={"type":"don"})}}'>{{=T("REGISTER HERE")}}</a></strong></p>
+    {{pass}}
+</div> 
+<div id='home' class='donate'>
+{{if s3.language == "en":}}
+<h1>Donate to organizations that support the</h1><h1>City of Los Angeles</h1>
+{{else:}}
+<h1>{{=T("Donate to organizations that support the City of Los Angeles")}}</h1>
+{{pass}}
+{{=P(XML(T("Every donation that you %(give2la)s counts.  Your tax deductable contribution will be used to support our community disaster preparedness, response, and recovery needs.  No donation is ever too small - Your generosity and kind consideration is greatly appreciated!") % dict(give2la = "<strong>Give2<em>LA</em></strong>")))}}
+  <br>
+  <div class='paper-fold left-fold'>
+    <h2>{{=T("DONATE CASH")}}</h2>
+    <ul class='organizations-list left'>
+        <li><a href='http://laemergencypreparednessfoundation.org' target='_blank'>
+        <img src='/{{=request.application}}/static/img/la/logo-laepf.png' alt='Los Angeles Emergency Preparedness Foundation - {{=T("Link opens a new window")}}'>
+        <br/>Los Angeles Emergency Preparedness Foundation</a>
+        <div style="display: none;" class="donate-popup"><span class="body">
+        {{=T("The Los Angeles Emergency Preparedness Foundation is a registered 501C-3 non-profit and authorized by the City of Los Angeles as the official foundation supporting emergency preparedness efforts in Los Angeles.")}}
+        </span>
+        <!-- <span class="footer" style = "font-size:95%;">Los Angeles Emergency Preparedness Foundation...</span> -->
+        </div>
+        </li>
+        <li><a href='http://redcrossla.org/donations/' target='_blank'><img src='/{{=request.application}}/static/img/la/logo_arc.png' alt='American Red Cross Los Angeles - {{=T("Link opens a new window")}}'>
+        <br/>American Red Cross Los Angeles</a>
+        <div style="display: none;" class="donate-popup"><span class="body">
+        {{=T("Every day, men and women like you donate to the American Red Cross Los Angeles Region to help us change lives. Once the decision to make a gift is made, careful planning will ensure the most cost-effective result for the donor and the most beneficial result for those who are helped by the American Red Cross. The Red Cross provides relief for victims of house and apartment fires, earthquakes, floods, hazardous material spills, transportation accidents, explosions and other natural or man-made disasters --- 24 hours a day.")}}
+        </span>
+        <!-- <span class="footer">American Red Cross...</span> -->
+        </div>
+        </li>
+        <li><a href='http://donate.worldvision.org/OA_HTML/xxwv2ibeCCtpItmDspRte.jsp?item=1753180&go=item&&prod=7iiz_BqIpf5U1lNllhQ8v45t:S&prod_pses=ZG7A83A6A3079DA3CFB9B8FC431492081A2D895AD40A1197D734E489A1E5C03C0D5DF5ECEE10125304508FF60E8ED4911A382332176E356EAE' target='_blank'><img src='/{{=request.application}}/static/img/la/logo_wvi.png' alt="World Vision International - {{=T("Link opens a new window")}}">
+        <br/>World Vision International</a>
+        <div style="display: none;" class="donate-popup"><span class="body">
+        {{=T("World Vision is a Christian humanitarian organization dedicated to working with children, families, and their communities worldwide to reach their full potential by tackling the causes of poverty and injustice.")}}
+        </span>
+        <!-- <span class="footer">World Vision International...</span> -->
+        </div>
+        </li>
+        <li><a href='http://www1.usw.salvationarmy.org/usw/www_usw_southcal.nsf/vw-text-dynamic-arrays/DFB258CF156F6E51882576C6007DE155?openDocument&charset=utf-8' target='_blank'><img src='/{{=request.application}}/static/img/la/logo_sa.png' alt='The Salvation Army - {{=T("Link opens a new window")}}'>
+        <br/>The Salvation Army</a>
+        <div style="display: none;" class="donate-popup"><span class="body">
+        {{=T("The best way to assist during a disaster is to make a monetary donation; however, donations of gently used household goods and clothing can be accepted.  The Salvation cannot guarantee that any individual gifts-in-kind donated now will be sent to the disaster area. In time of disaster, our stores fill these needs from existing, pre-sorted stock. By continuing to donate gently-used household goods to your local Salvation Army store, you not only help your community, you help us prepare for future disaster relief needs.")}}
+        </span>
+        <!-- <span class="footer">Salvation Army...</span> -->
+        </div>
+        </li>
+    </ul> 
+  </div>
+ <div class='paper-fold right-fold'>
+    <h2>{{=T("DONATE ITEMS")}}</h2>
+    <ul class='organizations-list'>
+        <li><a href='http://www1.usw.salvationarmy.org/USW/www_usw_southcal.nsf/vw-dynamic-arrays/5DED36E5DB19B978882575A2006E94DC' target='_blank'><img src='/{{=request.application}}/static/img/la/logo_sa.png' alt='The Salvation Army - {{=T("Link opens a new window")}}'><br/>The Salvation Army</a></li>
+        <!--<li><a href='http://locator.goodwill.org' title='Goodwill Industries - {{=T("Link opens a new window")}}' target='_blank'><img src='/{{=request.application}}/static/img/la/logo_gw.png' alt='Goodwill Industries'><br/>Goodwill Industries</a></li>-->
+    </ul> 
+        <hr>
+        <h2>{{=T("Upcoming Donation Drives")}}</h2>
+        <ul class="schedule-list"> 
+        {{=donation_drives}}
+        <!-- <li><p><span class="date">Aug 30</span> (3:00pm-8:00pm)<br/><a href="#" target="_blank" title="Link opens in a new window">Atwater Village</a></p></li>
+         --> 
+        </ul>
+  </div>
+</div>
+
+<script type="text/javascript"> 
+
+</script>

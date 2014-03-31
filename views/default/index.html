@@ -1,0 +1,25 @@
+{{extend "layout.html"}}
+<div id='home' class='home'>
+<img src='/{{=request.application}}/static/img/la/mayor.jpg' align='right' class='mayor-img' width='111' height='111' alt='Mayor of Los Angeles - Eric Garcetti'>
+<h1>{{=T("Support the City of Los Angeles")}}</h1>
+{{=P(XML(T("%(give2la)s is the official website for the City of Los Angeles that provides information on volunteer and donation opportunities to support emergency preparedness, response, and recovery. Tax deductible contributions for Cash and Corporate in-kind items can be made through one or more of the non-profit organizations listed.") % dict(give2la = "<strong>Give2<em>LA</em></strong>")))}}
+{{=P(XML(T("The spirit of philanthropy is an integral part of Los Angeles culture. %(give2la)s is a great way for individuals, groups, and organizations interested in volunteering to help worthy causes and efforts before, during, and after an emergency. Please register to receive notifications of future Requests for Volunteers and to apply for requests online.") % dict(give2la = "<strong>Give2<em>LA</em></strong>")))}}
+<div class='paper-fold left-fold'>
+    <h2><a href='{{=URL(c="don") if not s3_has_role(STAFF) else URL(c="don", f="req")}}'>{{=T("DONATE")}}</a></h2> 
+    <h3>{{=T("You")}}</h3>
+    <p>{{=T("You can support our preparedness, response and recovery activities by making a monetary donation or by donating goods and services.")}}
+    <br/><strong><a href='/{{=request.application}}/don'>{{=T("CLICK HERE TO VIEW DONATION OPPORTUNITIES.")}}</a></strong></p>
+    <br/><h3>{{=T("Corporations & Organizations")}}</h3>
+    <p>{{=T("Corporations and Organizations can donate to support the City of Los Angeles, and also receive Situation Awareness Reports.")}}
+    <br/><strong><a href='/{{=request.application}}/default/register?type=don'>{{=T("CLICK HERE TO REGISTER.")}}</a></strong></p>
+</div> 
+<div class='paper-fold right-fold'>
+    <h2><a href='{{=URL(c="vol", f="req_skill") if not s3_has_role(STAFF) else URL(c="vol", f="req")}}'>{{=T("VOLUNTEER")}}</a></h2>
+    <h3>{{=T("You")}}</h3>
+    <p>{{=T("You can donate your time by becoming a volunteer to aid survivors of disasters or local emergencies.")}}
+    <br/><strong><a href='/{{=request.application}}/vol/req_skill'>{{=T("CLICK HERE TO VIEW REQUEST FOR VOLUNTEERS.")}}</a></strong></p>
+    <br/><h3>{{=T("Organizations & Groups")}}</h3>
+    <p>{{=T("Organizations and Groups can volunteer to support the City of Los Angeles, and also receive Situation Awareness Reports.")}}
+    <br/><strong><a href='/{{=request.application}}/default/register?type=vol'>{{=T("CLICK HERE TO REGISTER.")}}</a></strong></p>
+</div>
+</div>

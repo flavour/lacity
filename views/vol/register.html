@@ -1,0 +1,11 @@
+{{extend "layout.html"}}
+<div id='home'>
+<h1>{{=T("Register to Volunteer for the City of Los Angeles")}}</h1>
+<p>{{=XML(T("When a disaster happens, the generosity of volunteers makes the difference whether they take time to perform tasks such as filling sandbags for residents in flood areas, assisting in a Local Assistance Center, packing first-aid supplies, or helping unload trucks at a local donation center. When you volunteer it makes a difference no matter how much time you can %(give2la)s.")  % dict(give2la = "<strong>Give2<em>LA</em></strong>") )}}
+<p><a href='{{=URL(c="default", f="register", vars={"type":"vol"})}}'>{{=T("Click here to register your Volunteer Organization or Group.")}}</a></p>
+<h2 class='paper-strip'>{{=T("Profile")}}</h2>
+{{include "key.html"}}
+<div class='form-container'>
+{{=form}}
+</div>
+</div>
