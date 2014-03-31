@@ -54,19 +54,6 @@ if populate > 0:
     if not db(table.id > 0).select(table.id, limitby=(0, 1)).first():
        table.insert()
 
-    # Incident Reporting System
-    if deployment_settings.has_module("irs"):
-        # Categories visible to ends-users by default
-        table = db.irs_icategory
-        if not db(table.id > 0).select(table.id, limitby=(0, 1)).first():
-            table.insert(code = "flood")
-            table.insert(code = "geophysical.landslide")
-            table.insert(code = "roadway.bridgeClosure")
-            table.insert(code = "roadway.roadwayClosure")
-            table.insert(code = "other.buildingCollapsed")
-            table.insert(code = "other.peopleTrapped")
-            table.insert(code = "other.powerFailure")
-
     # Messaging Module
     if deployment_settings.has_module("msg"):
         table = db.msg_email_settings
@@ -127,113 +114,6 @@ if populate > 0:
             table.insert( name = "PSY - Psychologist")
             table.insert( name = "RN - Registered Nurse")
 
-    # Assessment
-    if deployment_settings.has_module("assess"):
-        table = db.assess_baseline_type
-        if not db(table.id > 0).select(table.id, limitby=(0, 1)).first():
-            table.insert( name = "# of population")
-            table.insert( name = "# of households" )
-            table.insert( name = "# of children under 5" )
-            table.insert( name = "# of children" )
-            table.insert( name = "# of cattle" )
-            table.insert( name = "Ha. of fields" )
-
-    # Impacts
-    if deployment_settings.has_module("irs") or deployment_settings.has_module("assess"):
-        table = db.impact_type
-        if not db(table.id > 0).select(table.id, limitby=(0, 1)).first():
-            table.insert( name = "# of People Affected" )
-            table.insert( name = "# People Needing Food",
-                          sector_id = \
-                              shn_get_db_field_value(db = db,
-                                                     table = "org_sector",
-                                                     field = "id",
-                                                     look_up = "Food",
-                                                     look_up_field = "abrv")
-                          )
-            table.insert( name = "# People at Risk From Vector-Borne Diseases",
-                          sector_id = \
-                              shn_get_db_field_value(db = db,
-                                                     table = "org_sector",
-                                                     field = "id",
-                                                     look_up = "Health",
-                                                     look_up_field = "abrv")
-                          )
-            table.insert( name = "# People without Access to Safe Drinking-Water",
-                          sector_id = \
-                              shn_get_db_field_value(db = db,
-                                                     table = "org_sector",
-                                                     field = "id",
-                                                     look_up = "WASH",
-                                                     look_up_field = "abrv")
-                          )
-            table.insert( name = "# Houses Damaged",
-                          sector_id = \
-                              shn_get_db_field_value(db = db,
-                                                     table = "org_sector",
-                                                     field = "id",
-                                                     look_up = "Shelter",
-                                                     look_up_field = "abrv")
-                          )
-            table.insert( name = "# Houses Flooded",
-                          sector_id = \
-                              shn_get_db_field_value(db = db,
-                                                     table = "org_sector",
-                                                     field = "id",
-                                                     look_up = "Shelter",
-                                                     look_up_field = "abrv")
-                          )
-            table.insert( name = "Water Level still high?",
-                          sector_id = \
-                              shn_get_db_field_value(db = db,
-                                                     table = "org_sector",
-                                                     field = "id",
-                                                     look_up = "Shelter",
-                                                     look_up_field = "abrv")
-                          )
-            table.insert( name = "Ha. Fields Flooded",
-                          sector_id = \
-                              shn_get_db_field_value(db = db,
-                                                     table = "org_sector",
-                                                     field = "id",
-                                                     look_up = "Agriculture",
-                                                     look_up_field = "abrv")
-                          )
-
-    # Project Module
-    if deployment_settings.has_module("project"):
-        table = db.project_need_type
-        if not db(table.id > 0).select(table.id, limitby=(0, 1)).first():
-            table.insert( name = T("People Needing Food") )
-            table.insert( name = T("People Needing Water") )
-            table.insert( name = T("People Needing Shelter") )
-
-    # Budget Module
-    if deployment_settings.has_module("budget") and deployment_settings.has_module("project"):
-        table = db.budget_parameter
-        if not db(table.id > 0).select(table.id, limitby=(0, 1)).first():
-            table.insert() # Only defaults are fine
-
-    # Ticketing System
-    if deployment_settings.has_module("ticket"):
-        table = db.ticket_category
-        if not db(table.id > 0).select(table.id, limitby=(0, 1)).first():
-            table.insert( name = "Report Missing Person" )
-            table.insert( name = "Report Security Incident" )
-            table.insert( name = "Report Information" )
-            table.insert( name = "Request for Assistance" )
-            table.insert( name = "Offer of Help" )
-
-    # Climate Data Portal
-    if deployment_settings.has_module("climate"):
-        for tablename in ["climate_rainfall_mm",
-                          "climate_min_temperature_celsius",
-                          "climate_max_temperature_celsius"]:
-            for field in ["sample_type",
-                          "time_period",
-                          "place_id"]:
-                db.executesql("CREATE INDEX %s__idx on %s(%s);" % (field, tablename, field))
-    
     # GIS Module
     table = db.gis_marker
     # Can't do sub-folders :/
@@ -1294,6 +1174,7 @@ if populate > 0:
                         bi.perform_tasks(path)
                     else:
                         print >> sys.stderr, "Unable to install demo %s no demo directory found" % index
+
         if demo == "":
             print >> sys.stderr, "Unable to install a demo with of an id '%s', please check 000_config and demo_folders.cfg" % populate
         else:

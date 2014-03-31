@@ -81,7 +81,6 @@ else:
     _debug = lambda m: None
 
 # =============================================================================
-
 class S3RequestManager(object):
     """
         Request Manager
@@ -229,7 +228,7 @@ class S3RequestManager(object):
         """
 
         self.error = None
-        headers={"Content-Type":"application/json"}
+        headers = {"Content-Type":"application/json"}
         try:
             r = S3Request(self, *args, **vars)
         except SyntaxError:
@@ -527,7 +526,6 @@ class S3RequestManager(object):
         return None
 
 # =============================================================================
-
 class S3Request(object):
     """
         Class to handle RESTful requests

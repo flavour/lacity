@@ -1183,64 +1183,52 @@ def profile_onaccept(form):
     else:
         volunteer = True
 
+    post_vars = request.post_vars
     table = db.pr_person
     query = (table.id == auth.s3_logged_in_person())
-    db(query).update(middle_name=request.post_vars.middle_name)
-    pe = db(query).select(table.pe_id,
-                          limitby=(0, 1)).first().pe_id
+    db(query).update(middle_name=post_vars.middle_name)
+    pe_id = db(query).select(table.pe_id,
+                             limitby=(0, 1)).first().pe_id
 
     if volunteer:
         # Contacts / Notifications
-        if "sub_email" in request.post_vars and \
-            request.post_vars.sub_email == "on":
+        if post_vars.get("sub_email") == "on":
             email_enabled = True
         else:
             email_enabled = False
-        if "sub_sms" in request.post_vars and \
-            request.post_vars.sub_sms == "on":
+        if post_vars.get("sub_sms") == "on":
             sms_enabled = True
         else:
             sms_enabled = False
-        home_phone = request.post_vars.home_phone
-        work_phone = request.post_vars.work_phone
-    email = request.post_vars.email
-    cell = request.post_vars.mobile
+        home_phone = post_vars.home_phone
+        work_phone = post_vars.work_phone
+    email = post_vars.email
+    cell = post_vars.mobile
     table = db.pr_contact
     if email:
-        utable = db.auth_user
-        query = (utable.id == auth.user.id)
-        _email = db(query).select(utable.email,
-                                  limitby=(0, 1)).first().email
+        query = (table.pe_id == pe_id) & \
+                (table.contact_method == "EMAIL") & \
+                (table.deleted == False)
+        _email = db(query).select(table.value,
+                                  limitby=(0, 1)).first().value
         if not _email == email:
             # Email has changed
-            # Check that the new email doesn't clash
-            query2 = (utable.email == email)
-            test = db(query2).select(utable.id,
-                                     limitby=(0, 1)).first()
-            if not test:
-                # update auth_user
-                db(query).update(email=email)
-                # update pr_contact
-                query = (table.value == _email)
-                if volunteer:
-                    priority = 1 if email_enabled else 10
-                    db(query).update(value=email, priority=priority)
-                else:
-                    db(query).update(value=email)
+            # Update pr_contact
+            query = (table.value == _email)
+            if volunteer:
+                priority = 1 if email_enabled else 10
+                db(query).update(value=email, priority=priority)
             else:
-                # Existing .requires validation prevents the user from reusing
-                # an existing email
-                pass
+                db(query).update(value=email)
         elif volunteer:
             # Just update the notifications
-            query = (table.value == email)
             priority = 1 if email_enabled else 10
-            db(query).update(priority=priority)
+            db(table.value == email).update(priority=priority)
 
     _cell = ""
     _home_phone = ""
     _work_phone = ""
-    query = (table.pe_id == pe) & \
+    query = (table.pe_id == pe_id) & \
             (table.deleted == False)
     contacts = db(query).select(table.contact_method,
                                 table.value)
@@ -1252,7 +1240,7 @@ def profile_onaccept(form):
         elif contact.contact_method == "WORK_PHONE":
             _work_phone = contact.value
     table = db.pr_contact
-    base_query = (table.pe_id == pe)
+    base_query = (table.pe_id == pe_id)
     if volunteer:
         priority = 1 if sms_enabled else 10
         if _cell:
@@ -1261,7 +1249,7 @@ def profile_onaccept(form):
             db(query).update(value=cell, priority=priority)
         elif cell:
             # Insert new record
-            table.insert(pe_id=pe, contact_method="SMS", value=cell,
+            table.insert(pe_id=pe_id, contact_method="SMS", value=cell,
                          priority=priority)
         if _home_phone:
             # Update existing record
@@ -1269,7 +1257,7 @@ def profile_onaccept(form):
             db(query).update(value=home_phone)
         elif home_phone:
             # Insert new record
-            table.insert(pe_id=pe, contact_method="HOME_PHONE",
+            table.insert(pe_id=pe_id, contact_method="HOME_PHONE",
                          value=home_phone)
 
         if _work_phone:
@@ -1278,19 +1266,19 @@ def profile_onaccept(form):
             db(query).update(value=work_phone)
         elif work_phone:
             # Insert new record
-            table.insert(pe_id=pe, contact_method="WORK_PHONE",
+            table.insert(pe_id=pe_id, contact_method="WORK_PHONE",
                          value=work_phone)
 
         # Address
-        address1 = request.post_vars.address1
-        address2 = request.post_vars.address2
+        address1 = post_vars.address1
+        address2 = post_vars.address2
         if address2:
             address = "%s\n%s" % (address1, address2)
         else:
             address = address1
-        zip = request.post_vars.zip
-        city = request.post_vars.city
-        state = request.post_vars.location_id
+        zip = post_vars.zip
+        city = post_vars.city
+        state = post_vars.location_id
         table = db.gis_location
         statename = db(table.id == state).select(table.name,
                                                  cache=gis.cache,
@@ -1313,8 +1301,9 @@ def profile_onaccept(form):
                 gis.update_location_tree(_city, state)
         else:
             _city = None
+        load("pr_address")
         table = db.pr_address
-        query = (table.pe_id == pe) & \
+        query = (table.pe_id == pe_id) & \
                 (table.deleted == False)
         test = db(query).select(table.location_id,
                                 limitby=(0, 1)).first()
@@ -1357,26 +1346,25 @@ def profile_onaccept(form):
             elif org.name == "Volunteer Center of Los Angeles":
                 VCLA = org.id
         orgs = []
-        if "arc" in request.post_vars and request.post_vars.arc == "on":
+        if post_vars.get("arc") == "on":
             orgs.append(ARC)
-        if "cert" in request.post_vars and request.post_vars.cert == "on":
+        if post_vars.get("cert") == "on":
             orgs.append(CERT)
-        if "dhv" in request.post_vars and request.post_vars.dhv == "on":
+        if post_vars.get("dhv") == "on":
             orgs.append(DHV)
-        if "laworks" in request.post_vars and \
-           request.post_vars.laworks == "on":
+        if post_vars.get("laworks") == "on":
             orgs.append(LAW)
-        if "vcla" in request.post_vars and request.post_vars.vcla == "on":
+        if post_vars.get("vcla") == "on":
             orgs.append(VCLA)
         load("vol_organisation")
         table = db.vol_organisation
-        query = (table.pe_id == pe)
+        query = (table.pe_id == pe_id)
         test = db(query).select(table.id,
                                 limitby=(0, 1)).first()
         if test:
             db(query).update(organisations_id = orgs)
         else:
-            table.insert(pe_id = pe,
+            table.insert(pe_id = pe_id,
                          organisations_id = orgs,
                          owned_by_user = auth.user.id)
 
@@ -1388,7 +1376,7 @@ def profile_onaccept(form):
             db(query).update(value=cell)
         elif cell:
             # Insert new record
-            table.insert(pe_id=pe, contact_method="SMS", value=cell)
+            table.insert(pe_id=pe_id, contact_method="SMS", value=cell)
 
 # -----------------------------------------------------------------------------
 # Skills
@@ -1406,19 +1394,28 @@ def skill():
     table.person_id.default = person
     table.person_id.writable = table.person_id.readable = False
 
+    ctable = db.vol_contact
+    record = db(ctable.person_id == person).select(table.id,
+                                                   limitby=(0, 1),
+                                                   cache = gis.cache).first()
+    if record:
+        create_next = None
+    else:
+        # Workflow: Prompt for creating Emergency Contacts after adding Skills
+        create_next = URL(f="contact", args="my")
+
     configure(tablename,
-              # Workflow: Prompt for creating Emergency Contacts after adding Skills
-              create_next = URL(f="contact", args=["my"]),
-              update_next = URL(f="skill", args=["my"]),
+              create_next = create_next,
+              update_next = URL(f="skill", args="my"),
               deletable = False,
-              listadd = False)
+              listadd = False,
+              )
 
     # Parse the request
     if "my" in request.args:
-        query = (table.person_id == person)
-        record = db(query).select(table.id,
-                                  limitby=(0, 1),
-                                  cache = gis.cache).first()
+        record = db(table.person_id == person).select(table.id,
+                                                      limitby=(0, 1),
+                                                      cache = gis.cache).first()
         if record:
             r = s3mgr.parse_request(args=[str(record.id)])
         else:
@@ -1449,6 +1446,7 @@ def contact():
     table.person_id.writable = table.person_id.readable = False
 
     configure(tablename,
+              # Workflow: During registration, proceed to List of Requests after contacts created
               create_next = URL(f="req_skill"),
               update_next = URL(f="contact", args=["my"]),
               deletable = False,
@@ -1456,13 +1454,13 @@ def contact():
 
     # Parse the request
     if "my" in request.args:
-        query = (table.person_id == person)
-        record = db(query).select(table.id,
-                                  limitby=(0, 1)).first()
+        record = db(table.person_id == person).select(table.ALL,
+                                                      limitby=(0, 1),
+                                                      cache = gis.cache).first()
         if record:
-            r = s3mgr.parse_request(args=[str(record.id)])
+            r = s3mgr.parse_request(args=str(record.id))
         else:
-            r = s3mgr.parse_request(args=["create"])
+            r = s3mgr.parse_request(args="create")
     else:
         r = s3mgr.parse_request()
 

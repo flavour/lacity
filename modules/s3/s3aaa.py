@@ -3614,7 +3614,6 @@ class S3Audit(object):
         return True
 
 # =============================================================================
-
 class S3RoleManager(S3Method):
     """
         REST Method to manage ACLs (Role Manager UI for administrators)
@@ -4387,10 +4386,17 @@ class S3RoleManager(S3Method):
                                 (mtable.user_id == user_id) & \
                                 (mtable.group_id == role)
                         _set = db(query)
+                        deleted_fk = {"user_id": user_id,
+                                      "group_id": role}
                         if str(role) not in assign:
-                            _set.update(deleted=True)
+                            _set.update(deleted = True,
+                                        deleted_fk = deleted_fk,
+                                        user_id = None,
+                                        group_id = None,
+                                        )
                         else:
-                            membership = _set.select(limitby=(0, 1)).first()
+                            membership = _set.select(mtable.id,
+                                                     limitby=(0, 1)).first()
                             if not membership:
                                 mtable.insert(user_id=user_id, group_id=role)
                     session.confirmation = T("User Updated")

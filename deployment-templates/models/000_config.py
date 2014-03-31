@@ -464,11 +464,6 @@ deployment_settings.modules = OrderedDict([
             restricted = True,
             module_type = 4,
         )),
-    #("doc", Storage(
-    #        name_nice = T("Documents and Photos"),
-    #        restricted = True,
-    #        module_type = 10,
-    #    )),
     ("msg", Storage(
             name_nice = T("Messaging"),
             restricted = True,
@@ -495,11 +490,6 @@ deployment_settings.modules = OrderedDict([
             restricted = True,
             module_type = 10,
         )),
-    #("project", Storage(
-    #        name_nice = T("Project Tracking"),
-    #        restricted = True,
-    #        module_type = None
-    #    )),
     # Don depends on Inv & Req
     ("don", Storage(
             name_nice = T("Donate"),

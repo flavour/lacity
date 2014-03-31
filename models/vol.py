@@ -120,6 +120,38 @@ def vol_tables():
         msg_list_empty = T("Currently no emergency contact defined"))
 
     # -------------------------------------------------------------------------
+    def vol_contact_onaccept(form):
+        """
+            Assign ownership of contacts to the volunteer
+        """
+
+        try:
+            record_id = form.vars.id
+        except:
+            return
+
+        table = db.vol_contact
+        query = (table.id == record_id)
+        person = db(query).select(table.person_id,
+                                  limitby=(0, 1)).first()
+        try:
+            person_id = person.person_id
+        except:
+            # Error!
+            return
+
+        # Assign ownership of assignments to the assigned volunteer
+        user_id = auth.s3_person_to_user(person_id)
+        if user_id:
+            db(query).update(owned_by_user=user_id)
+
+        return
+
+    configure("vol_contact",
+              onaccept = vol_contact_onaccept,
+              )
+
+    # -------------------------------------------------------------------------
     # Application
     # -------------------------------------------------------------------------
     load("req_req")
@@ -366,8 +398,9 @@ def vol_tables():
             db(query).update(owned_by_user = auth_id)
 
     configure(tablename,
-                    onvalidation = application_onvalidation,
-                    listadd = False)
+              onvalidation = application_onvalidation,
+              listadd = False,
+              )
 
     # -------------------------------------------------------------------------
     # Assignment
@@ -561,7 +594,8 @@ def vol_tables():
                            (T("Reported To"), "report_to_id"),
                            "number",
                            "checkin",
-                           "checkout"]
+                           "checkout",
+                           ]
         else:
             # Volunteer
             list_fields = ["id",
@@ -570,10 +604,11 @@ def vol_tables():
                            (T("Date Required"), "date_required"),
                            (T("Reported To"), "report_to_id"),
                            "checkin",
-                           "checkout"]
+                           "checkout",
+                           ]
 
         configure(tablename,
-                        list_fields=list_fields)
+                  list_fields=list_fields)
 
     # -------------------------------------------------------------------------
     def assignment_onvalidate(form):
@@ -599,9 +634,8 @@ def vol_tables():
             commit = int(_vars.number)
             # Get the number required
             rstable = db.req_req_skill
-            query = (rstable.req_id == req_id)
-            record = db(query).select(rstable.quantity,
-                                      limitby=(0, 1)).first()
+            record = db(rstable.req_id == req_id).select(rstable.quantity,
+                                                         limitby=(0, 1)).first()
             needed = record.quantity
             # Get the number already committed (excluding this record)
             vastable = db.vol_assignment
@@ -630,8 +664,6 @@ def vol_tables():
             Update the req_commit status
         """
 
-        vastable = db.vol_assignment
-        rstable = db.req_req_skill
         try:
             record_id = form.vars.id
             person_id = form.vars.person_id
@@ -640,6 +672,8 @@ def vol_tables():
             # no action required
             return
 
+        vastable = db.vol_assignment
+        rstable = db.req_req_skill
         query = (vastable.id == record_id)
         if person_id:
             # Assign ownership of assignments to the assigned volunteer
@@ -705,10 +739,9 @@ def vol_tables():
                     db(query).update(person_id = person.person_id)
 
         rtable = db.req_req_skill
-        query = (rtable.req_id == req)
-        record = db(query).select(rtable.quantity,
-                                  rtable.quantity_fulfil,
-                                  limitby=(0, 1)).first()
+        record = db(rtable.req_id == req).select(rtable.quantity,
+                                                 rtable.quantity_fulfil,
+                                                 limitby=(0, 1)).first()
         if record and \
            record.quantity > record.quantity_fulfil:
             # Update Fulfil Quantity in Req
@@ -758,9 +791,8 @@ def vol_tables():
         """
 
         atable = db.vol_assignment
-        query = atable.id == row.id
-        assignment = db(query).select(atable.deleted_fk,
-                                      limitby=(0, 1)).first()
+        assignment = db(atable.id == row.id).select(atable.deleted_fk,
+                                                    limitby=(0, 1)).first()
 
         if not assignment:
             session.error = T("Assignment not found")
@@ -794,12 +826,13 @@ def vol_tables():
     listadd = s3_has_role(STAFF)
 
     configure(tablename,
-                    onvalidation = assignment_onvalidate,
-                    create_onaccept = assignment_onaccept,
-                    update_onaccept = assignment_onupdate,
-                    ondelete = assignment_ondelete,
-                    delete_next = URL(c="vol", f="req_skill"),
-                    listadd = listadd)
+              onvalidation = assignment_onvalidate,
+              create_onaccept = assignment_onaccept,
+              update_onaccept = assignment_onupdate,
+              ondelete = assignment_ondelete,
+              delete_next = URL(c="vol", f="req_skill"),
+              listadd = listadd,
+              )
 
     # -------------------------------------------------------------------------
     def vol_checkin(r, **attr):
@@ -872,13 +905,12 @@ def vol_tables():
     # -------------------------------------------------------------------------
     def getAddressFromSiteID(site_id, location=None):
         table = db.org_office
-        query = (table.id == site_id)
-        srecord = db(query).select(table.name,
-                                   table.address,
-                                   table.postcode,
-                                   table.L3,
-                                   table.L1,
-                                   limitby=(0, 1)).first()
+        srecord = db(table.id == site_id).select(table.name,
+                                                 table.address,
+                                                 table.postcode,
+                                                 table.L3,
+                                                 table.L1,
+                                                 limitby=(0, 1)).first()
         if srecord:
             if location == None or location == "":
                 location = srecord.name
@@ -886,19 +918,18 @@ def vol_tables():
                 location = T("%(site)s in %(location)s") % dict(site = srecord.name,
                                                                location = location)
             ltable = db.gis_location
-            query = (ltable.name == srecord.L1)
-            state = db(query).select(ltable.code,
-                                     limitby=(0, 1),
-                                     cache=gis.cache).first()
+            state = db(ltable.name == srecord.L1).select(ltable.code,
+                                                         limitby=(0, 1),
+                                                         cache=gis.cache).first()
             if state:
                 statecode = state.code
             else:
                 # Not valid US data (e.g. prepopulate)
                 statecode = None
             address = "%s<br/>%s<br/>%s<br/>%s" % (srecord.address,
-                                        srecord.L3,
-                                        statecode,
-                                        srecord.postcode)
+                                                   srecord.L3,
+                                                   statecode,
+                                                   srecord.postcode)
         else:
             location = address = ""
         return (location, address)
@@ -908,9 +939,8 @@ def vol_tables():
         phone = email = name = ""
         name = person_represent(person_id)
         table = db.pr_person
-        query = (table.id == person_id)
-        pe = db(query).select(table.pe_id,
-                              limitby=(0, 1)).first()
+        pe = db(table.id == person_id).select(table.pe_id,
+                                              limitby=(0, 1)).first()
         if pe:
             table = db.pr_contact
             query = (table.pe_id == pe.pe_id) & \
@@ -938,13 +968,15 @@ def vol_tables():
             Print out:
                 Assignment (for Vols)
                 Roster (for Site Admins)
+                Volunteer Certificate
         """
 
         # ---------------------------------------------------------------------
         def tearOff(canvas, dataList):
             """
-                callback method to draw the tear off lines for the report
+                Callback method to draw the tear off lines for the report
             """
+
             canvas.saveState()
             canvas.setDash(1,2)
             adjust = 5
@@ -960,8 +992,9 @@ def vol_tables():
         # ---------------------------------------------------------------------
         def badgeLogo(canvas, dataList):
             """
-                callback method to draw the logo for the report
+                Callback method to draw the logo for the report
             """
+
             from PIL import Image
             pdf = dataList[0]
             top = dataList[1]
@@ -997,7 +1030,11 @@ def vol_tables():
 
         # ---------------------------------------------------------------------
         def assignmentPDF(pdf, **args):
-            # set the banner
+            """
+                Callback to create a PDF of a Volunteer Assignment
+            """
+
+            # Set the banner
             pdf.setMargins(bottom = 0.3 * inch,
                            left = 0.4 * inch,
                            right = 0.4 * inch)
@@ -1009,16 +1046,15 @@ def vol_tables():
                 id = args["id"]
             query = (atable.id == id) & \
                     (rtable.id == atable.req_id)
-            fieldList = [rtable.site_id,
-                         rtable.location,
-                         rtable.request_for_id,
-                         rtable.date_required,
-                         rtable.date_required_until,
-                         rtable.purpose,
-                         rtable.comments,
-                        ]
-            record = db(query).select(limitby=(0, 1),
-                                      *fieldList).first()
+            record = db(query).select(rtable.site_id,
+                                      rtable.location,
+                                      rtable.request_for_id,
+                                      rtable.date_required,
+                                      rtable.date_required_until,
+                                      rtable.purpose,
+                                      rtable.comments,
+                                      limitby=(0, 1)
+                                      ).first()
             (location, address) = getAddressFromSiteID(record.site_id,
                                                        record.location)
             location = pdf.addParagraph(location, append=False)
@@ -1102,12 +1138,11 @@ def vol_tables():
             ctable = db.vol_contact
             query = (atable.id == id) & \
                     (ctable.person_id == atable.person_id)
-            fieldList = [atable.person_id,
-                         ctable.emergency_contact_name,
-                         ctable.emergency_contact_phone,
-                        ]
-            aprecord = db(query).select(limitby=(0, 1),
-                                        *fieldList).first()
+            aprecord = db(query).select(atable.person_id,
+                                        ctable.emergency_contact_name,
+                                        ctable.emergency_contact_phone,
+                                        limitby=(0, 1)
+                                        ).first()
             if aprecord:
                 # Emergency Contacts defined - should be a Vol
                 (vol_name, vol_email, vol_phone) = getContactFromPersonID(aprecord.vol_assignment.person_id)
@@ -1274,7 +1309,11 @@ def vol_tables():
 
         # ---------------------------------------------------------------------
         def rosterPDF(pdf, **args):
-            # set the banner
+            """
+                Callback to generate the PDF of the Roster
+            """
+
+            # Set the banner
             pdf.setMargins(left=0.4*inch, right = 0.4*inch)
             pdf.setHeaderBanner("static/img/la/Give2LAbranding_BW.jpg")
             # Prevent partially-translated strings
@@ -1293,7 +1332,7 @@ def vol_tables():
                          rtable.request_for_id,
                          rtable.date_required,
                          rtable.date_required_until,
-                        ]
+                         ]
             record = db(query).select(limitby=(0, 1),
                                       *fieldList).first()
             rdata = []
@@ -1305,8 +1344,9 @@ def vol_tables():
                                        record=record,
                                        strip_markup=True,
                                        non_xml_output=True
-                                      )
+                                       )
                 if text == "-":
+                    # NONE
                     text = ""
                 if (field.name == "request_for_id"):
                     (name, email, phone) = getContactFromHRMID(record.req_req.request_for_id)
@@ -1326,13 +1366,14 @@ def vol_tables():
                          table.checkout,
                          table.evaluation,
                          table.comments,
-                        ]
+                         ]
             data = []
             edata = []
             headings = [T("No.")]
             for field in fieldList:
                 if (field.name == "evaluation") \
                 or (field.name == "comments"):
+                    # Skip
                     continue
                 headings.append(field.label)
             headings.append(T("Signature"))
@@ -1352,7 +1393,7 @@ def vol_tables():
                                            record=record,
                                            strip_markup=True,
                                            non_xml_output=True
-                                          )
+                                           )
                     if field.name == "person_id":
                         if record.organisation_id:
                             person_label = table.organisation_id.label
@@ -1365,11 +1406,11 @@ def vol_tables():
                             # Single Person
                             person = text
                     if (field.name == "checkin") and text == "-":
-                            text = "                    "
-#                                text = "*GREY YYYY-MM-DD HH:MM"
-                    elif (field.name == "checkout") and text == "-":
+                        #text = "*GREY YYYY-MM-DD HH:MM"
                         text = "                    "
-#                            text = "*GREY YYYY-MM-DD HH:MM"
+                    elif (field.name == "checkout") and text == "-":
+                        #text = "*GREY YYYY-MM-DD HH:MM"
+                        text = "                    "
                     elif (field.name == "evaluation"):
                         if text == "None":
                             text = "*GREY 1  2  3  4  5"
@@ -1393,7 +1434,7 @@ def vol_tables():
                              ]
                             )
 
-            # push data to the pdf document
+            # Push data to the PDF document
             pdf.addrHeader(raw_data = rdata,)
             pdf.addSpacer(10)
             pdf.addTable(raw_data = data, style=pdfGridStyle,)
@@ -1446,7 +1487,9 @@ def vol_tables():
                 This method will add a border to the page.
                 It is a callback method and will not be called directly
             """
+
             from PIL import Image
+            folder = request.folder
             canvas.saveState()
             canvas.setStrokeColorRGB(0, 0, 0)
             inset = 3
@@ -1465,7 +1508,7 @@ def vol_tables():
                         stroke=1,
                         fill=0)
             image = "static/img/la/city_seal.png"
-            citySeal = os.path.join(current.request.folder,image)
+            citySeal = os.path.join(folder,image)
             if os.path.exists(citySeal):
                 im = Image.open(citySeal)
                 (iwidth, iheight) = im.size
@@ -1477,7 +1520,7 @@ def vol_tables():
                          width = width,
                          height = height)
             image = "static/img/la/EMD-logo.png"
-            EMDLogo = os.path.join(current.request.folder, image)
+            EMDLogo = os.path.join(folder, image)
             if os.path.exists(EMDLogo):
                 im = Image.open(EMDLogo)
                 (iwidth, iheight) = im.size
@@ -1496,9 +1539,11 @@ def vol_tables():
                 This method will add a border to the page.
                 It is a callback method and will not be called directly
             """
+
+            folder = request.folder
             canvas.saveState()
             image = "static/img/la/cert_border.png"
-            banner = os.path.join(current.request.folder, image)
+            banner = os.path.join(folder, image)
             if os.path.exists(banner):
                 canvas.drawImage(banner,
                                  0,
@@ -1506,7 +1551,7 @@ def vol_tables():
                                  width = doc.pagesize[0],
                                  height = doc.pagesize[1])
             image = "static/img/la/city_seal.png"
-            citySeal = os.path.join(current.request.folder, image)
+            citySeal = os.path.join(folder, image)
             if os.path.exists(citySeal):
                 canvas.drawImage(citySeal,
                                  1 * inch,
@@ -1514,7 +1559,7 @@ def vol_tables():
                                  width = 1.5 * inch,
                                  height = 1.5 * inch)
             image = "static/img/la/LA-BlackWhite.JPG"
-            cityLogo = os.path.join(current.request.folder, image)
+            cityLogo = os.path.join(folder, image)
             if os.path.exists(cityLogo):
                 canvas.drawImage(cityLogo,
                                  doc.pagesize[0] - 2.5 * inch,
@@ -1522,7 +1567,7 @@ def vol_tables():
                                  width = 1.5 * inch,
                                  height = 1.5 * inch)
             image = "static/img/la/signature.png"
-            signature = os.path.join(current.request.folder, image)
+            signature = os.path.join(folder, image)
             if os.path.exists(signature):
                 canvas.drawImage(signature,
                                  (doc.pagesize[0])/2.0 - 2.25 * inch,
@@ -1533,6 +1578,10 @@ def vol_tables():
 
         # ---------------------------------------------------------------------
         def volunteerCertificate(pdf, **args):
+            """
+                Callback to generate the PDF of the Volunteer Certificate
+            """
+
             pdf.setMargins(top=1.1*inch,
                            bottom=0.5*inch,
                            left=0.4*inch,
@@ -1560,7 +1609,7 @@ def vol_tables():
             from reportlab.lib.colors import Color
 
             fontname = "static/fonts/la/Engravers.ttf"
-            font = os.path.join(current.request.folder, fontname)
+            font = os.path.join(request.folder, fontname)
             pdfmetrics.registerFont(TTFont("CertFont", font))
 
             stylesheet=getSampleStyleSheet()
@@ -1621,23 +1670,22 @@ def vol_tables():
             vtable = db.vol_assignment
             if "id" in args:
                 id = args["id"]
-            query = (vtable.id == id)
-            fieldList = [vtable.person_id,
-                         vtable.req_id,
-                         vtable.checkin,
-                         vtable.checkout,
-                         ]
-            vrecord = db(query).select(limitby=(0, 1),
-                                       *fieldList).first()
+            vrecord = db(vtable.id == id).select(vtable.person_id,
+                                                 vtable.req_id,
+                                                 vtable.checkin,
+                                                 vtable.checkout,
+                                                 limitby=(0, 1)
+                                                 ).first()
             person_id = vrecord.person_id
             name = person_represent(person_id)
             try:
                 startDay = vrecord.checkin.strftime("%d %b %Y")
                 endDay = vrecord.checkout.strftime("%d %b %Y")
                 if startDay == endDay:
-                    date = T("On %s" % startDay)
+                    date = T("On %(startDay)s") % dict(startDay=StartDay)
                 else:
-                    date = T("During %s and %s" % (startDay, endDay))
+                    date = T("During %(startDay)s and %(endDay)s") % dict(startDay=StartDay,
+                                                                          endDay=endDay)
             except:
                 date = None
             load("event_event")
@@ -1645,10 +1693,9 @@ def vol_tables():
             etable = db.event_event
             query = (rtable.id == vrecord.req_id) & \
                     (rtable.event_id == etable.id)
-            fieldList = [etable.name,
-                         ]
-            erecord = db(query).select(limitby=(0, 1),
-                                       *fieldList).first()
+            erecord = db(query).select(etable.name,
+                                       limitby=(0, 1)
+                                       ).first()
             event = erecord.name
             now = datetime.datetime.now()
             today = {"day": now.strftime("%d"),
@@ -1688,11 +1735,11 @@ def vol_tables():
         T = current.T
         if r.component_id:
             table = db.vol_assignment
-            query = (table.id == r.component_id)
-            record = db(query).select(table.req_id,
-                                      table.checkout,
-                                      #table.task_evaluation,
-                                      limitby=(0, 1)).first()
+            record = db(table.id == r.component_id).select(table.req_id,
+                                                           table.checkout,
+                                                           #table.task_evaluation,
+                                                           limitby=(0, 1)
+                                                           ).first()
             req_id = record.req_id
             if record.checkout != None: #and record.task_evaluation != None:
                 configure("vol_assignment",
@@ -1715,6 +1762,9 @@ def vol_tables():
                                  name="req",
                                  args=args,
                                  extension="pdf")
+            if not r.http:
+                # Async
+                r.http = "GET"
             return r()
         else:
             # Roster (for Site Admin)
@@ -1730,9 +1780,12 @@ def vol_tables():
                                  http="GET")
             if r.component.count():
                 configure("vol_assignment",
-                                callback = rosterPDF,
-                                formname = T("Volunteer Roster - Attendance")
-                                )
+                          callback = rosterPDF,
+                          formname = T("Volunteer Roster - Attendance")
+                          )
+                if not r.http:
+                    # Async
+                    r.http = "GET"
                 return r()
             else:
                 session.error = T("No Assignments yet")
@@ -1765,8 +1818,8 @@ def vol_tables():
     #
     tablename = "vol_rostermail"
     table = define_table(tablename,
-                            Field("email", requires=IS_EMAIL()),
-                            *s3_meta_fields())
+                         Field("email", requires=IS_EMAIL()),
+                         *s3_meta_fields())
 
     crud_strings[tablename] = Storage(
         title_create = T("Add Roster Email Address"),
@@ -1796,12 +1849,12 @@ def vol_tables():
 
 # Provide a handle to this load function
 loader(vol_tables,
-             "vol_organisation",
-             "vol_skill",
-             "vol_contact",
-             "vol_application",
-             "vol_assignment",
-             "vol_rostermail")
+       "vol_organisation",
+       "vol_skill",
+       "vol_contact",
+       "vol_application",
+       "vol_assignment",
+       "vol_rostermail")
 
 # =============================================================================
 # Tasks to be callable async
@@ -1820,16 +1873,15 @@ def vol_rostermail(id, user_id=None):
     # Find the Roster
     load("vol_assignment")
     table = db.vol_assignment
-    query = (table.req_id == id)
-    roster = db(query).select(limitby=(0, 1)).first()
+    roster = db(table.req_id == id).select(table.id,
+                                           limitby=(0, 1)).first()
     if not roster:
         # Error
         return
 
     # Emails configured to always receive copies of the Roster
     table = db.vol_rostermail
-    query = (table.deleted == False)
-    emails = db(query).select(table.email)
+    emails = db(table.deleted == False).select(table.email)
 
     # Send to the Point of Contact & Requester
     rtable = db.req_req
@@ -1868,7 +1920,7 @@ def vol_rostermail(id, user_id=None):
         fp = open(pdfpath, "wb")
     except IOError as e:
         if e.errno == errno.EACCESS:
-            session.error = T("%s not writable!" % pdfpath)
+            session.error = T("%(filename)s not writable!") % dict(filename=pdfpath)
             return
         # Not a permission error.
         raise
@@ -1998,13 +2050,11 @@ def vol_req_cancel(id, user_id=None):
 
     # (soft) Delete the Request Skills
     rtable = db.req_req_skill
-    query = (rtable.req_id == id)
-    db(query).update(deleted=True)
+    db(rtable.req_id == id).update(deleted=True)
 
     # (soft) Delete the Request
     rtable = db.req_req
-    query = (rtable.id == id)
-    db(query).update(deleted=True)
+    db(rtable.id == id).update(deleted=True)
 
     # Remove all Assignments (to free up their time)
     table = db.vol_assignment
