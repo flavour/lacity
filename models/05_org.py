@@ -986,25 +986,25 @@ def org_office_duplicate(job):
 # -----------------------------------------------------------------------------
 # Offices as component of Organisations
 add_component(table,
-                          org_organisation="organisation_id")
+              org_organisation="organisation_id")
 
 configure(tablename,
-                super_entity=(db.pr_pentity, db.org_site),
-                onvalidation=address_onvalidation,
-                resolve=org_office_duplicate,
-                orderby = table.name,
-                list_fields=[ "id",
-                              "name",
-                              "organisation_id",   # Filtered in Component views
-                              #"type",
-                              #"L0",
-                              #"L1",
-                              #"L2",
-                              "L3",
-                              #"L4",
-                              "phone1",
-                              #"email"
-                            ])
+          super_entity=(db.pr_pentity, db.org_site),
+          onvalidation=address_onvalidation,
+          resolve=org_office_duplicate,
+          orderby = table.name,
+          list_fields=["id",
+                       "name",
+                       "organisation_id",   # Filtered in Component views
+                       #"type",
+                       #"L0",
+                       #"L1",
+                       #"L2",
+                       "L3",
+                       #"L4",
+                       "phone1",
+                       #"email"
+                       ])
 
 # -----------------------------------------------------------------------------
 def office_rheader(r, tabs=[]):
@@ -1019,17 +1019,18 @@ def office_rheader(r, tabs=[]):
 
             tabs = [(T("Basic Details"), None),
                     #(T("Contact Data"), "contact"),
+                    (T("Staff"), "human_resource"),
                     ]
-            if has_module("hrm"):
-                tabs.append((T("Staff"), "human_resource"))
-            try:
-                tabs = tabs + response.s3.req_tabs(r)
-            except:
-                pass
-            try:
-                tabs = tabs + response.s3.inv_tabs(r)
-            except:
-                pass
+            #if has_module("hrm"):
+            #    tabs.append((T("Staff"), "human_resource"))
+            #try:
+            #    tabs = tabs + response.s3.req_tabs(r)
+            #except:
+            #    pass
+            #try:
+            #    tabs = tabs + response.s3.inv_tabs(r)
+            #except:
+            #    pass
 
             rheader_tabs = s3_rheader_tabs(r, tabs)
 
@@ -1086,11 +1087,11 @@ def office_controller():
     table = db[tablename]
 
     # Load Models to add tabs
-    if has_module("inv"):
-        load("inv_inv_item")
-    elif has_module("req"):
-        # (gets loaded by Inv if available)
-        load("req_req")
+    #if has_module("inv"):
+    #    load("inv_inv_item")
+    #elif has_module("req"):
+    #    # (gets loaded by Inv if available)
+    #    load("req_req")
 
     if isinstance(request.vars.organisation_id, list):
         request.vars.organisation_id = request.vars.organisation_id[0]
