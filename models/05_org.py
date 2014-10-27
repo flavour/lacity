@@ -8,15 +8,14 @@ module = "org"
 
 #==============================================================================
 # Sector
-# (Cluster in UN-style terminology)
 #
 tablename = "org_sector"
 table = define_table(tablename,
-                        Field("abrv", length=68, notnull=True, unique=True, # 64 is normal, but EMD want one with 68-characters
-                              label=T("Abbreviation")),
-                        Field("name", length=128, notnull=True, unique=True,
-                              label=T("Name")),
-                        *s3_meta_fields())
+                     Field("abrv", length=68, notnull=True, unique=True, # 64 is normal, but EMD want one with 68-characters
+                           label=T("Abbreviation")),
+                     Field("name", length=128, notnull=True, unique=True,
+                           label=T("Name")),
+                     *s3_meta_fields())
 
 # CRUD strings
 SECTOR = T("Sector")
@@ -38,7 +37,7 @@ s3.crud_strings[tablename] = Storage(
 
 def org_sector_represent(opt):
     """
-        Sector/Cluster representation
+        Sector representation
         for multiple=True options
     """
 
@@ -74,6 +73,7 @@ def org_sector_duplicate(job):
       Rules for finding a duplicate:
        - Look for a record with the same abrv, ignoring case
     """
+
     # ignore this processing if the id is set
     if job.id:
         return
@@ -125,99 +125,99 @@ organisation_type_opts = {
 
 tablename = "org_organisation"
 table = define_table(tablename,
-                        super_link(db.pr_pentity), # pe_id
-                        #Field("privacy", "integer", default=0),
-                        #Field("archived", "boolean", default=False),
-                        Field("name", notnull=True, unique=True,
-                              length=128,           # Mayon Compatibility
-                              label = T("Name"),
-                              represent = lambda name: name.replace("&apos;","'") # fixes &apos; in IE8 DataTables
-                              ),
-                        Field("acronym", length=8, label = T("Acronym"),
-                              comment = DIV( _class="tooltip",
-                                             _title="%s|%s" % (T("Acronym"),
-                                                               T("Acronym of the organization's name, eg. IFRC.")))),
-                        Field("type", "integer", label = T("Type"),
-                              readable = False,
-                              writable = False,
-                              requires = IS_NULL_OR(IS_IN_SET(organisation_type_opts)),
-                              represent = lambda opt: \
-                                organisation_type_opts.get(opt, UNKNOWN_OPT)),
-                        sector_id(readable = False,
-                                  writable = False),
-                        # @LA: Address Details directly in the resource, no need to create a Facility
-                        Field("phone", label = T("Phone"),
-                              #required = True,
-                              requires = shn_phone_requires),
-                        Field("phone_mobile", label = deployment_settings.get_ui_label_mobile_phone(),
-                              requires = IS_NULL_OR(shn_phone_requires)),
-                        #address_building_name(),
-                        address_address(requires = IS_NOT_EMPTY()),
-                        #address_direction(),
-                        address_address2(),
-                        address_L3(label=T("City"),
-                                   requires = IS_NOT_EMPTY(),),
-                        address_L1(label=T("State"),
-                                   requires = IS_NOT_EMPTY(),
-                                   represent=gis_location_represent,
-                                   widget=S3LocationDropdownWidget(level="L1",
-                                                                   default="California",
-                                                                   empty=False)),
-                        address_postcode(requires = IS_NOT_EMPTY(),),
-                        # @LA: ORG_VOL
-                        Field("has_vols",
-                              "boolean",
-                              label = T("Has Volunteers"),
-                              #readable = False,
-                              #writable = False,
-                              ),
-                        # @LA: ORG_DON
-                        Field("has_items",
-                              "boolean",
-                              label = T("Donates Resources"),
-                              #readable = False,
-                              #writable = False,
-                              ),
-                        #Field("registration", label=T("Registration")),    # Registration Number
-                        Field("country", "string", length=2,
-                              readable = False,
-                              writable = False,
-                              label = T("Home Country"),
-                              requires = IS_NULL_OR(IS_IN_SET_LAZY(
-                                  lambda: gis.get_countries(key_type="code"),
-                                  zero = SELECT_LOCATION)),
-                              represent = lambda code: \
-                                  gis.get_country(code, key_type="code") or UNKNOWN_OPT),
-                        Field("website", label = T("Website"),
-                              readable = False,
-                              writable = False,
-                              requires = IS_NULL_OR(IS_URL()),
-                              represent = shn_url_represent),
-                        Field("twitter",                        # deprecated by contact component
-                              readable = False,
-                              writable = False,
-                              comment = DIV( _class="tooltip",
-                                             _title="%s|%s" % (T("Twitter"),
-                                                               T("Twitter ID or #hashtag")))),
-                        Field("donation_phone", label = T("Donation Phone #"),
-                              readable = False,
-                              writable = False,
-                              requires = IS_NULL_OR(shn_phone_requires),
-                              comment = DIV( _class="tooltip",
-                                             _title="%s|%s" % (T("Donation Phone #"),
-                                                               T("Phone number to donate to this organization's relief efforts.")))),
-                        Field("upload",
-                               "upload",
-                               label = T("Documents"),
-                               comment = DIV(_class="tooltip",
-                                             _title="%s|%s" % (T("Documents"),
-                                                               T("Legal, Insurance, etc")
-                                                               )
-                                            )
-                              ),
-                        comments(),
-                        #document_id(), # Better to have multiple Documents on a Tab
-                        *s3_meta_fields())
+                     super_link(db.pr_pentity), # pe_id
+                     #Field("privacy", "integer", default=0),
+                     #Field("archived", "boolean", default=False),
+                     Field("name", notnull=True, unique=True,
+                           length=128,           # Mayon Compatibility
+                           label = T("Name"),
+                           represent = lambda name: name.replace("&apos;","'") # fixes &apos; in IE8 DataTables
+                           ),
+                     Field("acronym", length=8, label = T("Acronym"),
+                           comment = DIV( _class="tooltip",
+                                          _title="%s|%s" % (T("Acronym"),
+                                                            T("Acronym of the organization's name, eg. IFRC.")))),
+                     Field("type", "integer", label = T("Type"),
+                           readable = False,
+                           writable = False,
+                           requires = IS_NULL_OR(IS_IN_SET(organisation_type_opts)),
+                           represent = lambda opt: \
+                             organisation_type_opts.get(opt, UNKNOWN_OPT)),
+                     sector_id(readable = False,
+                               writable = False),
+                     # @LA: Address Details directly in the resource, no need to create a Facility
+                     Field("phone", label = T("Phone"),
+                           #required = True,
+                           requires = shn_phone_requires),
+                     Field("phone_mobile", label = deployment_settings.get_ui_label_mobile_phone(),
+                           requires = IS_NULL_OR(shn_phone_requires)),
+                     #address_building_name(),
+                     address_address(requires = IS_NOT_EMPTY()),
+                      #address_direction(),
+                     address_address2(),
+                     address_L3(label=T("City"),
+                                requires = IS_NOT_EMPTY(),),
+                     address_L1(label=T("State"),
+                                requires = IS_NOT_EMPTY(),
+                                represent=gis_location_represent,
+                                widget=S3LocationDropdownWidget(level="L1",
+                                                                default="California",
+                                                                empty=False)),
+                     address_postcode(requires = IS_NOT_EMPTY(),),
+                     # @LA: ORG_VOL
+                     Field("has_vols",
+                           "boolean",
+                           label = T("Has Volunteers"),
+                           #readable = False,
+                           #writable = False,
+                           ),
+                     # @LA: ORG_DON
+                     Field("has_items",
+                           "boolean",
+                            label = T("Donates Resources"),
+                           #readable = False,
+                           #writable = False,
+                           ),
+                     #Field("registration", label=T("Registration")),    # Registration Number
+                     Field("country", "string", length=2,
+                           readable = False,
+                           writable = False,
+                           label = T("Home Country"),
+                           requires = IS_NULL_OR(IS_IN_SET_LAZY(
+                               lambda: gis.get_countries(key_type="code"),
+                               zero = SELECT_LOCATION)),
+                           represent = lambda code: \
+                            gis.get_country(code, key_type="code") or UNKNOWN_OPT),
+                     Field("website", label = T("Website"),
+                           readable = False,
+                           writable = False,
+                           requires = IS_NULL_OR(IS_URL()),
+                           represent = shn_url_represent),
+                     Field("twitter",                        # deprecated by contact component
+                           readable = False,
+                           writable = False,
+                           comment = DIV(_class="tooltip",
+                                         _title="%s|%s" % (T("Twitter"),
+                                                           T("Twitter ID or #hashtag")))),
+                     Field("donation_phone", label = T("Donation Phone #"),
+                           readable = False,
+                           writable = False,
+                           requires = IS_NULL_OR(shn_phone_requires),
+                           comment = DIV(_class="tooltip",
+                                         _title="%s|%s" % (T("Donation Phone #"),
+                                                           T("Phone number to donate to this organization's relief efforts.")))),
+                     Field("upload",
+                            "upload",
+                            label = T("Documents"),
+                            comment = DIV(_class="tooltip",
+                                          _title="%s|%s" % (T("Documents"),
+                                                            T("Legal, Insurance, etc")
+                                                             )
+                                         )
+                           ),
+                     comments(),
+                     #document_id(), # Better to have multiple Documents on a Tab
+                     *s3_meta_fields())
 
 # Virtual Field for don_item
 class org_organisation_virtualfields(dict, object):
@@ -263,16 +263,16 @@ s3.crud_strings[tablename] = Storage(
     msg_list_empty = T("No Organizations currently registered"))
 
 configure(tablename,
-                super_entity = db.pr_pentity,
-                orderby = table.name,
-                list_fields = ["id",
-                               "name",
-                               "acronym",
-                               #"type",
-                               #"sector_id",
-                               #"country",
-                               #"website"
-                            ])
+          super_entity = db.pr_pentity,
+          orderby = table.name,
+          list_fields = ["id",
+                         "name",
+                         "acronym",
+                         #"type",
+                         #"sector_id",
+                         #"country",
+                         #"website"
+                         ])
 
 # organisation_id reusable field ----------------------------------------------
 #
@@ -434,6 +434,7 @@ def organisation_duplicate(job):
        - Look for a record with the same name, ignoring case
        - and the same location, if provided
     """
+
     # ignore this processing if the id is set
     if job.id:
         return
@@ -442,10 +443,6 @@ def organisation_duplicate(job):
         name = "name" in job.data and job.data.name
         #query = table.name.lower().like('%%%s%%' % name.lower()) or
         #        table.acronym.lower().like('%%%s%%' % name.lower())
-        if "location_id" in job.data:
-            location_id = job.data.location_id
-            query = query & \
-                 (table.location_id == location_id)
         if "location_id" in job.data:
             location_id = job.data.location_id
             query = query & \
@@ -459,7 +456,7 @@ def organisation_duplicate(job):
             job.method = job.METHOD.UPDATE
 
 #configure(tablename,
-#                resolve=organisation_duplicate)
+#          resolve=organisation_duplicate)
 
 # -----------------------------------------------------------------------------
 def organisation_rheader(r, tabs=[]):
@@ -474,20 +471,15 @@ def organisation_rheader(r, tabs=[]):
         rheader_tabs = s3_rheader_tabs(r, tabs)
 
         organisation = r.record
-        if organisation.sector_id:
-            _sectors = org_sector_represent(organisation.sector_id)
-        else:
-            _sectors = None
+        #if organisation.sector_id:
+        #    _sectors = org_sector_represent(organisation.sector_id)
+        #else:
+        #    _sectors = None
 
         try:
             _type = organisation_type_opts[organisation.type]
         except KeyError:
             _type = None
-
-        if deployment_settings.get_ui_cluster():
-            sector_label = T("Cluster(s)")
-        else:
-            sector_label = T("Sector(s)")
 
         rheader = DIV(TABLE(
             TR(
@@ -497,7 +489,7 @@ def organisation_rheader(r, tabs=[]):
                 T("Yes") if organisation.has_vols else T("No"),
                 TH("%s: " % T("Donates Resources?")),
                 T("Yes") if organisation.has_items else T("No"),
-                #TH("%s: " % sector_label),
+                #TH("%s: " % T("Sector(s)")),
                 #_sectors
                 ),
             TR(
@@ -526,13 +518,15 @@ def organisation_controller(organisation_rheader = organisation_rheader,
     tabs = [(T("Basic Details"), None),
             (T("Contacts"), "contact"),
             (T("Facilities"), "office"),
-           ]
+            ]
 
     # Pre-process
     def prep(r):
         if org_prep:
             org_prep(r)
         if r.interactive:
+            # Load Models
+            load("gis_config")
             r.table.country.default = gis.get_default_country("code")
             if r.component_name == "human_resource" and r.component_id:
                 # Workaround until widget is fixed:
@@ -547,12 +541,12 @@ def organisation_controller(organisation_rheader = organisation_rheader,
                 # Process Base Location
                 #configure(r.component.table._tablename,
                 #                onaccept=address_onaccept)
-            elif r.component_name == "task" and \
-                 r.method != "update" and r.method != "read":
-                    # Create or ListCreate
-                    r.component.table.organisation_id.default = r.id
-                    r.component.table.status.writable = False
-                    r.component.table.status.readable = False
+            #elif r.component_name == "task" and \
+            #     r.method != "update" and r.method != "read":
+            #        # Create or ListCreate
+            #        r.component.table.organisation_id.default = r.id
+            #        r.component.table.status.writable = False
+            #        r.component.table.status.readable = False
         return True
 
     # Set hooks
@@ -560,7 +554,7 @@ def organisation_controller(organisation_rheader = organisation_rheader,
 
     rheader = lambda r: organisation_rheader(r, tabs=tabs)
     configure("org_organisation",
-                    update_next = URL(f="organisation", args=["[id]"]))
+              update_next = URL(f="organisation", args=["[id]"]))
     output = s3_rest_controller("org", "organisation",
                                 native=False, rheader=rheader)
     return output
@@ -730,62 +724,62 @@ _table_user.site_id.comment = DIV(_class="tooltip",
 # Rooms (for Sites)
 # @ToDo: Validate to ensure that rooms are unique per facility
 #
-tablename = "org_room"
-table = define_table(tablename,
-                        site_id, # site_id
-                        Field("name", length=128, notnull=True),
-                        *s3_meta_fields())
+#tablename = "org_room"
+#table = define_table(tablename,
+#                     site_id, # site_id
+#                     Field("name", length=128, notnull=True),
+#                     *s3_meta_fields())
 
 # CRUD strings
-ADD_ROOM = T("Add Room")
-LIST_ROOMS = T("List Rooms")
-s3.crud_strings[tablename] = Storage(
-    title_create = ADD_ROOM,
-    title_display = T("Room Details"),
-    title_list = LIST_ROOMS,
-    title_update = T("Edit Room"),
-    title_search = T("Search Rooms"),
-    subtitle_create = T("Add New Room"),
-    subtitle_list = T("Rooms"),
-    label_list_button = LIST_ROOMS,
-    label_create_button = ADD_ROOM,
-    label_delete_button = T("Delete Room"),
-    msg_record_created = T("Room added"),
-    msg_record_modified = T("Room updated"),
-    msg_record_deleted = T("Room deleted"),
-    msg_list_empty = T("No Rooms currently registered"))
+#ADD_ROOM = T("Add Room")
+#LIST_ROOMS = T("List Rooms")
+#s3.crud_strings[tablename] = Storage(
+#    title_create = ADD_ROOM,
+#    title_display = T("Room Details"),
+#    title_list = LIST_ROOMS,
+#    title_update = T("Edit Room"),
+#    title_search = T("Search Rooms"),
+#    subtitle_create = T("Add New Room"),
+#    subtitle_list = T("Rooms"),
+#    label_list_button = LIST_ROOMS,
+#    label_create_button = ADD_ROOM,
+#    label_delete_button = T("Delete Room"),
+#    msg_record_created = T("Room added"),
+#    msg_record_modified = T("Room updated"),
+#    msg_record_deleted = T("Room deleted"),
+#    msg_list_empty = T("No Rooms currently registered"))
 
-room_comment = DIV(A(ADD_ROOM,
-                     _class="colorbox",
-                     _href=URL(c="org", f="room",
-                               args="create",
-                               vars=dict(format="popup")),
-                     _target="top",
-                     _title=ADD_ROOM),
-                   DIV( _class="tooltip",
-                        _title="%s|%s" % (ADD_ROOM,
-                                          T("Select a Room from the list or click 'Add Room'"))),
-                   # Filters Room based on site
-                   SCRIPT("""S3FilterFieldChange({
-                                 'FilterField':   'site_id',
-                                 'Field':         'room_id',
-                                 'FieldPrefix':   'org',
-                                 'FieldResource': 'room',
-                                 });""")
-                    )
+#room_comment = DIV(A(ADD_ROOM,
+#                     _class="colorbox",
+#                     _href=URL(c="org", f="room",
+#                               args="create",
+#                               vars=dict(format="popup")),
+#                     _target="top",
+#                     _title=ADD_ROOM),
+#                   DIV( _class="tooltip",
+#                        _title="%s|%s" % (ADD_ROOM,
+#                                          T("Select a Room from the list or click 'Add Room'"))),
+#                   # Filters Room based on site
+#                   SCRIPT("""S3FilterFieldChange({
+#                                 'FilterField':   'site_id',
+#                                 'Field':         'room_id',
+#                                 'FieldPrefix':   'org',
+#                                 'FieldResource': 'room',
+#                                 });""")
+#                    )
 
 # Reusable field for other tables to reference
-room_id = S3ReusableField("room_id", db.org_room, sortby="name",
-                          requires = IS_NULL_OR(IS_ONE_OF(db, "org_room.id", "%(name)s")),
-                          represent = lambda id: \
-                            (id and [db(db.org_room.id == id).select(db.org_room.name,
-                                                                     limitby=(0, 1)).first().name] or [NONE])[0],
-                          label = T("Room"),
-                          comment = room_comment,
-                          ondelete = "SET NULL")
+#room_id = S3ReusableField("room_id", db.org_room, sortby="name",
+#                          requires = IS_NULL_OR(IS_ONE_OF(db, "org_room.id", "%(name)s")),
+#                          represent = lambda id: \
+#                            (id and [db(db.org_room.id == id).select(db.org_room.name,
+#                                                                     limitby=(0, 1)).first().name] or [NONE])[0],
+#                          label = T("Room"),
+#                          comment = room_comment,
+#                          ondelete = "SET NULL")
 
 # =============================================================================
-# Offices
+# Offices / Facilities
 #
 org_office_type_opts = {    # @ToDo: Migrate these to constants: s3.OFFICE_TYPE
     1:T("Headquarters"),
@@ -809,78 +803,78 @@ office_comment = DIV(A(ADD_OFFICE,
 
 tablename = "org_office"
 table = define_table(tablename,
-                        super_link(db.pr_pentity), # pe_id
-                        super_link(db.org_site),   # site_id
-                        Field("name", notnull=True,
-                              length=64,           # Mayon Compatibility
-                              label = T("Name")),
-                        Field("code",
-                              length=10,
-                              # Deployments that don't wants office codes can hide them
-                              readable=False,
-                              writable=False,
-                              # Mayon compatibility
-                              # @ToDo: Deployment Setting to add validator to make these unique
-                              #notnull=True,
-                              #unique=True,
-                              label=T("Code")),
-                        organisation_id(widget = S3OrganisationAutocompleteWidget(default_from_profile = True)),
-                        Field("type", "integer", label = T("Type"),
-                              readable = False,
-                              writable = False,
-                              requires = IS_NULL_OR(IS_IN_SET(org_office_type_opts)),
-                              represent = lambda opt: \
-                                org_office_type_opts.get(opt, UNKNOWN_OPT)),
-                        Field("office_id", "reference org_office", # This form of hierarchy may not work on all Databases
-                              readable = False,
-                              writable = False,
-                              label = T("Parent Office"),
-                              comment = office_comment),
-                        address_building_name(),
-                        address_address(),
-                        #address_direction(),
-                        address_address2(),
-                        address_L3(),
-                        address_L1(),
-                        address_postcode(),
-                        location_id(),
-                        Field("phone1", label = T("Phone"),
-                              requires = IS_NULL_OR(shn_phone_requires)),
-                        Field("phone2", label = T("Phone 2"),
-                              readable = False,
-                              writable = False,
-                              requires = IS_NULL_OR(shn_phone_requires)),
-                        Field("email", label = T("Email"),
-                              readable = False,
-                              writable = False,
-                              requires = IS_NULL_OR(IS_EMAIL())),
-                        Field("fax", label = T("Fax"),
-                              readable = False,
-                              writable = False,
-                              requires = IS_NULL_OR(shn_phone_requires)),
-                        # @ToDo: Calculate automatically from org_staff (but still allow manual setting for a quickadd)
-                        #Field("international_staff", "integer",
-                        #      label = T("# of National Staff"),
-                        #      requires = IS_NULL_OR(IS_INT_IN_RANGE(0, 9999))),
-                        #Field("national_staff", "integer",
-                        #      label = T("# of International Staff"),
-                        #      requires = IS_NULL_OR(IS_INT_IN_RANGE(0, 99999))),
-                        # @ToDo: Move to Fixed Assets
-                        #Field("number_of_vehicles", "integer",
-                        #      label = T("# of Vehicles"),
-                        #      requires = IS_NULL_OR(IS_INT_IN_RANGE(0, 9999))),
-                        #Field("vehicle_types", label = T("Vehicle Types")),
-                        #Field("equipment", label = T("Equipment")),
-                        Field("obsolete", "boolean",
-                              label = T("Obsolete"),
-                              readable = False,
-                              writable = False,
-                              represent = lambda bool: \
-                                (bool and [T("Obsolete")] or [NONE])[0],
-                              default = False),
-                        #document_id(),  # Better to have multiple Documents on a Tab
-                        comments(),
-                        *s3_meta_fields())
+                     super_link(db.pr_pentity), # pe_id
+                     super_link(db.org_site),   # site_id
+                     Field("name", notnull=True,
+                           length=64,           # Mayon Compatibility
+                           label = T("Name")),
+                     Field("code",
+                           length=10,
+                           # Deployments that don't wants office codes can hide them
+                           readable=False,
+                           writable=False,
+                           # Mayon compatibility
+                           # @ToDo: Deployment Setting to add validator to make these unique
+                           #notnull=True,
+                           #unique=True,
+                           label=T("Code")),
+                     organisation_id(widget = S3OrganisationAutocompleteWidget(default_from_profile = True)),
+                     Field("type", "integer", label = T("Type"),
+                           readable = False,
+                           writable = False,
+                           requires = IS_NULL_OR(IS_IN_SET(org_office_type_opts)),
+                           represent = lambda opt: \
+                             org_office_type_opts.get(opt, UNKNOWN_OPT)),
+                     Field("office_id", "reference org_office", # This form of hierarchy may not work on all Databases
+                           readable = False,
+                           writable = False,
+                           label = T("Parent Office"),
+                           comment = office_comment),
+                     address_building_name(),
+                     address_address(),
+                     #address_direction(),
+                     address_address2(),
+                     address_L3(),
+                     address_L1(),
+                     address_postcode(),
+                     location_id(),
+                     Field("phone1", label = T("Phone"),
+                           requires = IS_NULL_OR(shn_phone_requires)),
+                     Field("phone2", label = T("Phone 2"),
+                           readable = False,
+                           writable = False,
+                           requires = IS_NULL_OR(shn_phone_requires)),
+                     Field("email", label = T("Email"),
+                           readable = False,
+                           writable = False,
+                           requires = IS_NULL_OR(IS_EMAIL())),
+                     Field("fax", label = T("Fax"),
+                           readable = False,
+                           writable = False,
+                           requires = IS_NULL_OR(shn_phone_requires)),
+                     # @ToDo: Calculate automatically from org_staff (but still allow manual setting for a quickadd)
+                     #Field("international_staff", "integer",
+                     #      label = T("# of National Staff"),
+                     #      requires = IS_NULL_OR(IS_INT_IN_RANGE(0, 9999))),
+                     #Field("national_staff", "integer",
+                     #      label = T("# of International Staff"),
+                     #      requires = IS_NULL_OR(IS_INT_IN_RANGE(0, 99999))),
+                     # @ToDo: Move to Fixed Assets
+                     #Field("number_of_vehicles", "integer",
+                     #      label = T("# of Vehicles"),
+                     #      requires = IS_NULL_OR(IS_INT_IN_RANGE(0, 9999))),
+                     #Field("vehicle_types", label = T("Vehicle Types")),
+                     #Field("equipment", label = T("Equipment")),
+                     Field("obsolete", "boolean",
+                           label = T("Obsolete"),
+                           readable = False,
+                           writable = False,
+                           represent = lambda bool: \
+                            (bool and [T("Obsolete")] or [NONE])[0],
+                           default = False),
+                     #document_id(),  # Better to have multiple Documents on a Tab
+                     comments(),
+                     *s3_meta_fields())
 
 # Field settings
 table.office_id.requires = IS_NULL_OR(IS_ONE_OF(db, "org_office.id",
@@ -1044,21 +1038,18 @@ def office_rheader(r, tabs=[]):
                 org_name = None
 
             rheader = DIV(TABLE(
-                          TR(
-                             TH("%s: " % T("Name")),
+                          TR(TH("%s: " % T("Name")),
                              office.name,
                              TH("%s: " % T("Type")),
                              org_office_type_opts.get(office.type,
                                                       UNKNOWN_OPT),
                              ),
-                          TR(
-                             TH("%s: " % T("Organization")),
+                          TR(TH("%s: " % T("Organization")),
                              org_name or NONE,
                              TH("%s: " % T("Location")),
                              gis_location_represent(office.location_id),
                              ),
-                          TR(
-                             TH("%s: " % T("Email")),
+                          TR(TH("%s: " % T("Email")),
                              office.email or NONE,
                              TH("%s: " % T("Telephone")),
                              office.phone1 or NONE,
@@ -1124,7 +1115,7 @@ def office_controller():
                   ),
         ))
     configure(tablename,
-                    search_method = office_search)
+              search_method = office_search)
 
     # Pre-processor
     def prep(r):
@@ -1210,62 +1201,62 @@ DOMAIN_HELP = T("If a user verifies that they own an Email Address with this dom
 APPROVER_HELP = T("The Email Address to which approval requests are sent (normally this would be a Group mail rather than an individual). If the field is blank then requests are approved automatically if the domain matches.")
 
 table = define_table(tablename,
-                        organisation_id(
-                              comment=DIV(_class="tooltip",
-                                          _title="%s|%s" % (T("Organization"),
-                                                            ORG_HELP))),
-                        Field("domain",
-                              label=T("Domain"),
-                              comment=DIV(_class="tooltip",
-                                          _title="%s|%s" % (T("Domain"),
-                                                            DOMAIN_HELP))),
-                        Field("approver",
-                              label=T("Approver"),
-                              requires=IS_NULL_OR(IS_EMAIL()),
-                              comment=DIV(_class="tooltip",
-                                          _title="%s|%s" % (T("Approver"),
-                                                            APPROVER_HELP))),
-                        comments(),
-                        *s3_meta_fields())
+                     organisation_id(
+                          comment=DIV(_class="tooltip",
+                                      _title="%s|%s" % (T("Organization"),
+                                                        ORG_HELP))),
+                     Field("domain",
+                           label=T("Domain"),
+                           comment=DIV(_class="tooltip",
+                                       _title="%s|%s" % (T("Domain"),
+                                                         DOMAIN_HELP))),
+                     Field("approver",
+                           label=T("Approver"),
+                           requires=IS_NULL_OR(IS_EMAIL()),
+                           comment=DIV(_class="tooltip",
+                                       _title="%s|%s" % (T("Approver"),
+                                                         APPROVER_HELP))),
+                     comments(),
+                     *s3_meta_fields())
 
 # =============================================================================
 # Organisation Contact Table
 tablename = "org_contact"
 table = define_table(tablename,
-                        organisation_id(
-                              comment=DIV(_class="tooltip",
-                                          _title="%s|%s" % (T("Organization"),
-                                                            ORG_HELP))),
-                        Field("focal_point",
-                              "boolean",
-                              label = T("Point of Contact"),
-                              represent = lambda focal_point: T("Yes") if focal_point else T("No")),
-                        Field("first_name", notnull=True,
-                              length=64, # Mayon Compatibility
-                              # NB Not possible to have an IS_NAME() validator here
-                              # http://eden.sahanafoundation.org/ticket/834
-                              requires = IS_NOT_EMPTY(error_message = T("Please enter a first name")),
-                              comment =  DIV(_class="tooltip",
-                                             _title="%s|%s" % (T("First name"),
-                                                               T("The first or only name of the person (mandatory)."))),
-                              label = T("First Name")),
-                        Field("middle_name",
-                              length=64, # Mayon Compatibility
-                              label = T("Middle Name")),
-                        Field("last_name",
-                              length=64, # Mayon Compatibility
-                              label = T("Last Name"),
-                              requires = last_name_validate),
-                        Field("email", 
-                              notnull=True, 
-                              label= T("Email"),
-                              requires = IS_EMAIL(error_message='Enter a valid email!')),
-                        Field("work_phone", 
-                              notnull=True, 
-                              label= T("Work Number")),
-                        Field("mobile_phone", 
-                              label= T("Cell Phone Number")),
-                        *s3_meta_fields())
+                     organisation_id(
+                            comment=DIV(_class="tooltip",
+                                        _title="%s|%s" % (T("Organization"),
+                                                          ORG_HELP))),
+                     Field("focal_point",
+                           "boolean",
+                           label = T("Point of Contact"),
+                           represent = lambda focal_point: T("Yes") if focal_point else T("No")),
+                     Field("first_name", notnull=True,
+                           length=64, # Mayon Compatibility
+                           # NB Not possible to have an IS_NAME() validator here
+                           # http://eden.sahanafoundation.org/ticket/834
+                           requires = IS_NOT_EMPTY(error_message = T("Please enter a first name")),
+                           comment =  DIV(_class="tooltip",
+                                          _title="%s|%s" % (T("First name"),
+                                                            T("The first or only name of the person (mandatory)."))),
+                           label = T("First Name")),
+                     Field("middle_name",
+                           length=64, # Mayon Compatibility
+                           label = T("Middle Name")),
+                     Field("last_name",
+                           length=64, # Mayon Compatibility
+                           label = T("Last Name"),
+                           requires = last_name_validate),
+                     Field("email", 
+                           notnull=True, 
+                           label= T("Email"),
+                           requires = IS_EMAIL(error_message='Enter a valid email!')),
+                     Field("work_phone", 
+                           notnull=True, 
+                           label= T("Work Number")),
+                     Field("mobile_phone", 
+                           label= T("Cell Phone Number")),
+                     *s3_meta_fields())
 
 # CRUD strings
 s3.crud_strings[tablename] = Storage(
@@ -1287,6 +1278,6 @@ s3.crud_strings[tablename] = Storage(
 # -----------------------------------------------------------------------------
 # Contacts as component of Organisations
 add_component(table,
-                          org_organisation="organisation_id")
+              org_organisation = "organisation_id")
 
 # END =========================================================================

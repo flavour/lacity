@@ -429,44 +429,6 @@ s3.crud_strings = Storage(
     msg_no_match = T("No Matching Records"))
 
 # =============================================================================
-# Common tables
-
-# Import Files
-# @ToDo: Replace with Importer UI which is accessible to non-Admins
-import_type_opts = {
-    "asset_asset": T("Assets"),
-    "hrm_person": T("Human Resources"),
-    "inv_stock_posn": T("Inventory Stock Position"),
-    "supply_item_category": T("Supply Item Categories"),
-    "inv_warehouse": T("Warehouses")
-}
-
-tablename = "admin_import_file"
-table = db.define_table(tablename,
-                        Field("type", label = T("Type"),
-                              comment = A(T("Download Template"),
-                                          _id="dl_template",
-                                          _class="hidden"),
-                              requires = IS_IN_SET(import_type_opts),
-                              represent = lambda opt: import_type_opts.get(opt,
-                                                                           NONE)),
-                        Field("filename",
-                              readable=False, # Just shows up in List View
-                              writable=False,
-                              label = T("File name")),
-                        Field("file", "upload", autodelete=True,
-                              requires = IS_UPLOAD_FILENAME(extension="csv"),
-                              uploadfolder = os.path.join(request.folder,
-                                                          "uploads",
-                                                          "imports"),
-                              comment = DIV( _class="tooltip",
-                                             _title="%s|%s" % (T("Import File"),
-                                                               T("Upload a CSV file formatted according to the Template."))),
-                              label = T("Import File")),
-                        comments(),
-                         *s3_timestamp())
-
-# -----------------------------------------------------------------------------
 # Define CRUD strings (NB These apply to all Modules' "settings" too)
 crud_strings = s3.crud_strings
 ADD_SETTING = T("Add Setting")

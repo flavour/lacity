@@ -34,7 +34,9 @@
     OTHER DEALINGS IN THE SOFTWARE.
 """
 
-__all__ = ["S3Model", "S3RecordLinker"]
+__all__ = ("S3Model",
+           #"S3RecordLinker",
+           )
 
 import sys
 
@@ -54,7 +56,6 @@ else:
     _debug = lambda m: None
 
 # =============================================================================
-
 class S3Model(object):
     """
         S3 Model extensions
@@ -715,7 +716,6 @@ class S3Model(object):
         return (None, None, None)
 
 # =============================================================================
-
 class S3RecordLinker(object):
     """
         Hyperlinks between resources

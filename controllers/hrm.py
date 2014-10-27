@@ -2,16 +2,10 @@
 
 """
     Human Resource Management
-
-    @author: Dominic König <dominic AT aidiq DOT com>
-    @author: Fran Boon <fran AT aidiq DOT com>
 """
 
 module = request.controller
 resourcename = request.function
-
-if module not in deployment_settings.modules:
-    raise HTTP(404, body="Module disabled: %s" % module)
 
 roles = session.s3.roles or []
 if session.s3.hrm is None:
@@ -702,16 +696,14 @@ def group():
 # =============================================================================
 # Jobs
 # =============================================================================
-def job_role():
-    """ Job Roles Controller """
-
-    mode = session.s3.hrm.mode
-    if mode is not None:
-        session.error = T("Access denied")
-        redirect(URL(f="index"))
-
-    output = s3_rest_controller(module, resourcename)
-    return output
+#def job_role():
+#    """ Job Roles Controller """
+#    mode = session.s3.hrm.mode
+#    if mode is not None:
+#        session.error = T("Access denied")
+#        redirect(URL(f="index"))
+#    output = s3_rest_controller(module, resourcename)
+#    return output
 
 # =============================================================================
 # Skills
@@ -746,116 +738,95 @@ def skill_type():
     return output
 
 # -----------------------------------------------------------------------------
-def competency_rating():
-    """ Competency Rating for Skill Types Controller """
-
-    mode = session.s3.hrm.mode
-    if mode is not None:
-        session.error = T("Access denied")
-        redirect(URL(f="index"))
-
-    # Load Models
-    s3mgr.load("hrm_skill")
-
-    output = s3_rest_controller(module, resourcename)
-    return output
+#def competency_rating():
+#    """ Competency Rating for Skill Types Controller """
+#    mode = session.s3.hrm.mode
+#    if mode is not None:
+#        session.error = T("Access denied")
+#        redirect(URL(f="index"))
+#    # Load Models
+#    s3mgr.load("hrm_skill")
+#    output = s3_rest_controller(module, resourcename)
+#    return output
 
 # -----------------------------------------------------------------------------
-def skill_competencies():
-    """
-        Called by S3FilterFieldChange to provide the competency options for a
-            particular Skill Type
-    """
-
-    # Load Models
-    s3mgr.load("hrm_skill")
-
-    table = db.hrm_skill
-    ttable = db.hrm_skill_type
-    rtable = db.hrm_competency_rating
-    query = (table.id == request.args[0]) & \
-            (table.skill_type_id == ttable.id) & \
-            (rtable.skill_type_id == table.skill_type_id)
-    records = db(query).select(rtable.id,
-                               rtable.name)
-
-    response.headers["Content-Type"] = "application/json"
-    return records.json()
+#def skill_competencies():
+#    """
+#        Called by S3FilterFieldChange to provide the competency options for a
+#            particular Skill Type
+#    """
+#    # Load Models
+#    s3mgr.load("hrm_skill")
+#    table = db.hrm_skill
+#    ttable = db.hrm_skill_type
+#    rtable = db.hrm_competency_rating
+#    query = (table.id == request.args[0]) & \
+#            (table.skill_type_id == ttable.id) & \
+#            (rtable.skill_type_id == table.skill_type_id)
+#    records = db(query).select(rtable.id,
+#                               rtable.name)
+#    response.headers["Content-Type"] = "application/json"
+#    return records.json()
 
 # -----------------------------------------------------------------------------
-def skill_provision():
-    """ Skill Provisions Controller """
-
-    mode = session.s3.hrm.mode
-    if mode is not None:
-        session.error = T("Access denied")
-        redirect(URL(f="index"))
-
-    # Load Models
-    s3mgr.load("hrm_skill")
-
-    output = s3_rest_controller(module, resourcename)
-    return output
+#def skill_provision():
+#    """ Skill Provisions Controller """
+#    mode = session.s3.hrm.mode
+#    if mode is not None:
+#        session.error = T("Access denied")
+#        redirect(URL(f="index"))
+#    # Load Models
+#    s3mgr.load("hrm_skill")
+#    output = s3_rest_controller(module, resourcename)
+#    return output
 
 # -----------------------------------------------------------------------------
-def course():
-    """ Courses Controller """
-
-    mode = session.s3.hrm.mode
-    if mode is not None:
-        session.error = T("Access denied")
-        redirect(URL(f="index"))
-
-    # Load Models
-    s3mgr.load("hrm_skill")
-
-    output = s3_rest_controller(module, resourcename)
-    return output
+#def course():
+#    """ Courses Controller """
+#    mode = session.s3.hrm.mode
+#    if mode is not None:
+#        session.error = T("Access denied")
+#        redirect(URL(f="index"))
+#    # Load Models
+#    s3mgr.load("hrm_skill")
+#    output = s3_rest_controller(module, resourcename)
+#    return output
 
 # -----------------------------------------------------------------------------
-def course_certificate():
-    """ Courses to Certificates Controller """
-
-    mode = session.s3.hrm.mode
-    if mode is not None:
-        session.error = T("Access denied")
-        redirect(URL(f="index"))
-
-    # Load Models
-    s3mgr.load("hrm_skill")
-
-    output = s3_rest_controller(module, resourcename)
-    return output
+#def course_certificate():
+#    """ Courses to Certificates Controller """
+#    mode = session.s3.hrm.mode
+#    if mode is not None:
+#        session.error = T("Access denied")
+#        redirect(URL(f="index"))
+#    # Load Models
+#    s3mgr.load("hrm_skill")
+#    output = s3_rest_controller(module, resourcename)
+#    return output
 
 # -----------------------------------------------------------------------------
-def certificate():
-    """ Certificates Controller """
-
-    mode = session.s3.hrm.mode
-    if mode is not None:
-        session.error = T("Access denied")
-        redirect(URL(f="index"))
-
-    # Load Models
-    s3mgr.load("hrm_skill")
-
-    output = s3_rest_controller(module, resourcename)
-    return output
+#def certificate():
+#    """ Certificates Controller """
+#    mode = session.s3.hrm.mode
+#    if mode is not None:
+#        session.error = T("Access denied")
+#        redirect(URL(f="index"))
+#    # Load Models
+#    s3mgr.load("hrm_skill")
+#    output = s3_rest_controller(module, resourcename)
+#    return output
 
 # -----------------------------------------------------------------------------
-def certificate_skill():
-    """ Certificates to Skills Controller """
-
-    mode = session.s3.hrm.mode
-    if mode is not None:
-        session.error = T("Access denied")
-        redirect(URL(f="index"))
-
-    # Load Models
-    s3mgr.load("hrm_skill")
-
-    output = s3_rest_controller(module, resourcename)
-    return output
+#def certificate_skill():
+#    """ Certificates to Skills Controller """
+#    mode = session.s3.hrm.mode
+#    if mode is not None:
+#        session.error = T("Access denied")
+#        redirect(URL(f="index"))
+#    # Load Models
+#    s3mgr.load("hrm_skill")
+#    output = s3_rest_controller(module, resourcename)
+#    return output
 
 # =============================================================================
 def staff_org_site_json():

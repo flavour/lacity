@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 
-""" Messaging Module - Controllers """
+"""
+    Messaging Module
+"""
 
 module = request.controller
 resourcename = request.function
-
-if module not in deployment_settings.modules:
-    raise HTTP(404, body="Module disabled: %s" % module)
 
 s3mgr.load("msg_outbox")
 

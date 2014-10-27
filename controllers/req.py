@@ -2,17 +2,10 @@
 
 """
     Request Management
-
-    @author: Michael Howden (michael@sahanafoundation.org)
-    @author: Fran Boon
-    @date-created: 2010-09-02
 """
 
 module = request.controller
 resourcename = request.function
-
-if not deployment_settings.has_module(module):
-    raise HTTP(404, body="Module disabled: %s" % module)
 
 shn_menu(module)
 
@@ -191,18 +184,18 @@ def req_item_inv_item():
     output["items"] = inv_items["items"]
 
     # Get list of alternative inventory items
-    atable = db.supply_item_alt
-    query = (atable.item_id == req_item.item_id ) & \
-            (atable.deleted == False )
-    alt_item_rows = db(query).select(atable.alt_item_id)
-    alt_item_ids = [alt_item_row.alt_item_id for alt_item_row in alt_item_rows]
+    #atable = db.supply_item_alt
+    #query = (atable.item_id == req_item.item_id ) & \
+    #        (atable.deleted == False )
+    #alt_item_rows = db(query).select(atable.alt_item_id)
+    #alt_item_ids = [alt_item_row.alt_item_id for alt_item_row in alt_item_rows]
 
-    if alt_item_ids:
-        response.s3.filter = (db.inv_inv_item.item_id.belongs(alt_item_ids))
-        inv_items_alt = s3_rest_controller("inv", "inv_item")
-        output["items_alt"] = inv_items_alt["items"]
-    else:
-        output["items_alt"] = T("No Inventories currently have suitable alternative items in stock")
+    #if alt_item_ids:
+    #    response.s3.filter = (db.inv_inv_item.item_id.belongs(alt_item_ids))
+    #    inv_items_alt = s3_rest_controller("inv", "inv_item")
+    #    output["items_alt"] = inv_items_alt["items"]
+    #else:
+    #    output["items_alt"] = T("No Inventories currently have suitable alternative items in stock")
 
     response.view = "req/req_item_inv_item.html"
     response.s3.actions = [dict(url = URL(c = request.controller,

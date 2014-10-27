@@ -724,10 +724,10 @@ class S3Comment(object):
             @param title: the title of the comment, mostly it will the
                           name of the field to which the comment belongs to
 
-            @param anchor_title: hiperlink title for HTML forms, added just
+            @param anchor_title: hyperlink title for HTML forms, added just
                                  just before the tooltip
 
-            @param anchor_link: hiperlink url, anchor_title and anchor_link
+            @param anchor_link: hyperlink url, anchor_title and anchor_link
                                 should be specified together
         """
 

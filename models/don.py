@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-    Donations (LA Specific)
-
-    @author: Michael Howden (michael@sahanafoundation.org)
-    @date-created: 2011-08-03
+    Donations
 """
 
 module = "don"
@@ -134,59 +131,56 @@ def don_tables():
     # Collections (Donation Drives)
     tablename = "don_collect"
     table = define_table(tablename,
-                            event_id(default=session.s3.event),
-                            Field("start_datetime",
-                                  "datetime",
-                                  label = T("Start"),
-                                  requires = IS_EMPTY_OR(
-                                              IS_UTC_DATETIME_IN_RANGE(
-                                                minimum=request.utcnow - datetime.timedelta(days=1),
-                                                error_message="%s %%(min)s!" %
-                                                    T("Enter a valid future date"))),
-                                  widget = S3DateTimeWidget(past=0,
-                                                            future=8760), # Hours, so 1 year
-                                  represent = s3_utc_represent
-                                  ),
-                            Field("end_datetime",
-                                  "datetime",
-                                  label = T("End"),
-                                  requires = IS_EMPTY_OR(
-                                              IS_UTC_DATETIME_IN_RANGE(
-                                                minimum=request.utcnow - datetime.timedelta(days=1),
-                                                error_message="%s %%(min)s!" %
-                                                    T("Enter a valid future date"))),
-                                  widget = S3DateTimeWidget(past=0,
-                                                            future=8760), # Hours, so 1 year
-                                  represent = s3_utc_represent
-                                  ),
-                            super_link(db.org_site,
-                                       label = T("Collection At"),
-                                       readable = True,
-                                       writable = True,
-                                       empty = False,
-                                       # Comment these to use a Dropdown & not an Autocomplete
-                                       #widget = S3SiteAutocompleteWidget(),
-                                       #comment = DIV(_class="tooltip",
-                                       #              _title="%s|%s" % (T("Requested By Facility"),
-                                       #                                T("Enter some characters to bring up a list of possible matches"))),
-                                       represent = shn_site_represent),
-                            organisation_id(label = T("Collected By Organization"),
-                                            empty = False,
-                                            widget = None
-                                            ),
-                            comments("donation_comments",
-                                     writable = True,
-                                     label = T("Donation Comments"),
-                                     comment=DIV(_class="tooltip",
-                                        _title="%s|%s" % (T("Donation Comments"),
-                                                          T("Additional comments concerning this donation drive.")))),
-                            Field("volume",
-                                  "double",
-                                  label = T("Volume Collected (cub. ft)")),
-                            Field("weight",
-                                  "double",
-                                  label = T("Weight Collected (lbs)")),
-                            *s3_meta_fields())
+                         event_id(default=session.s3.event),
+                         Field("start_datetime", "datetime",
+                               label = T("Start"),
+                               requires = IS_EMPTY_OR(
+                                          IS_UTC_DATETIME_IN_RANGE(
+                                            minimum=request.utcnow - datetime.timedelta(days=1),
+                                            error_message="%s %%(min)s!" %
+                                                T("Enter a valid future date"))),
+                               widget = S3DateTimeWidget(past=0,
+                                                         future=8760), # Hours, so 1 year
+                               represent = s3_utc_represent
+                               ),
+                         Field("end_datetime", "datetime",
+                               label = T("End"),
+                               requires = IS_EMPTY_OR(
+                                           IS_UTC_DATETIME_IN_RANGE(
+                                             minimum=request.utcnow - datetime.timedelta(days=1),
+                                             error_message="%s %%(min)s!" %
+                                                 T("Enter a valid future date"))),
+                               widget = S3DateTimeWidget(past=0,
+                                                         future=8760), # Hours, so 1 year
+                               represent = s3_utc_represent
+                               ),
+                         super_link(db.org_site,
+                                    label = T("Collection At"),
+                                    readable = True,
+                                    writable = True,
+                                    empty = False,
+                                    # Comment these to use a Dropdown & not an Autocomplete
+                                    #widget = S3SiteAutocompleteWidget(),
+                                    #comment = DIV(_class="tooltip",
+                                    #              _title="%s|%s" % (T("Requested By Facility"),
+                                    #                                T("Enter some characters to bring up a list of possible matches"))),
+                                    represent = shn_site_represent),
+                         organisation_id(label = T("Collected By Organization"),
+                                         empty = False,
+                                         widget = None
+                                         ),
+                         comments("donation_comments",
+                                  writable = True,
+                                  label = T("Donation Comments"),
+                                  comment=DIV(_class="tooltip",
+                                     _title="%s|%s" % (T("Donation Comments"),
+                                                       T("Additional comments concerning this donation drive.")))),
+                         Field("volume", "double",
+                               label = T("Volume Collected (cub. ft)")),
+                         Field("weight", "double",
+                               label = T("Weight Collected (lbs)")),
+                         *s3_meta_fields())
+
     # CRUD strings
     ADD_COLLECT = T("Add New Donation Drive")
     LIST_COLLECT = T("List Donation Drives")
@@ -213,41 +207,39 @@ def don_tables():
     # Voucher Distribution
     tablename = "don_distribute"
     table = define_table(tablename,
-                            event_id(default=session.s3.event),
-                            Field("date",
-                                  "date"),
-                            #human_resource_id("requested_by_id",
-                            #                  label = T("Requested By"),
-                            #                  empty = False,
-                            #                  default = s3_logged_in_human_resource()),
-                            organisation_id(label = T("Distributed By Organization"),
-                                            empty = False,
-                                            ),
-                            Field("households",
-                                  "double",
-                                  label = T("Number of Households")),
-                            Field("value",
-                                  "double",
-                                  label = T("Total Value of Vouchers")),
-                            currency_type("currency"),
-                            super_link(db.org_site,
-                                       label = T("Distributed At"),
-                                       readable = True,
-                                       writable = True,
-                                       empty = False,
-                                       # Comment these to use a Dropdown & not an Autocomplete
-                                       #widget = S3SiteAutocompleteWidget(),
-                                       #comment = DIV(_class="tooltip",
-                                       #              _title="%s|%s" % (T("Requested By Facility"),
-                                       #                                T("Enter some characters to bring up a list of possible matches"))),
-                                       represent = shn_site_represent),
-                            comments("distribute_comments",
-                                     writable = True,
-                                     label = T("Voucher Comments"),
-                                     comment=DIV(_class="tooltip",
-                                        _title="%s|%s" % (T("Distribution Comments"),
-                                                          T("Additional comments about this voucher distribution.")))),
-                            *s3_meta_fields())
+                         event_id(default=session.s3.event),
+                         Field("date", "date"),
+                         #human_resource_id("requested_by_id",
+                         #                  label = T("Requested By"),
+                         #                  empty = False,
+                         #                  default = s3_logged_in_human_resource()),
+                         organisation_id(label = T("Distributed By Organization"),
+                                         empty = False,
+                                         ),
+                         Field("households", "double",
+                               label = T("Number of Households")),
+                         Field("value", "double",
+                               label = T("Total Value of Vouchers")),
+                         currency_type("currency"),
+                         super_link(db.org_site,
+                                    label = T("Distributed At"),
+                                    readable = True,
+                                    writable = True,
+                                    empty = False,
+                                    # Comment these to use a Dropdown & not an Autocomplete
+                                    #widget = S3SiteAutocompleteWidget(),
+                                    #comment = DIV(_class="tooltip",
+                                    #              _title="%s|%s" % (T("Requested By Facility"),
+                                    #                                T("Enter some characters to bring up a list of possible matches"))),
+                                    represent = shn_site_represent),
+                         comments("distribute_comments",
+                                  writable = True,
+                                  label = T("Voucher Comments"),
+                                  comment=DIV(_class="tooltip",
+                                     _title="%s|%s" % (T("Distribution Comments"),
+                                                       T("Additional comments about this voucher distribution.")))),
+                         *s3_meta_fields())
+
     # CRUD strings
     ADD_DISTRIBUTE = T("Record Voucher Distribution")
     LIST_DISTRIBUTE = T("Voucher Distributions")
@@ -774,8 +766,7 @@ def don_tables():
 
     # -------------------------------------------------------------------------
     # Pass variables back to global scope (response.s3.*)
-    return dict(
-                donationRequest = donationRequest,
+    return dict(donationRequest = donationRequest,
                 donationFooter = donationFooter,
                 donationCertificate = donationCertificate,
                 donCertBorder = donCertBorder,
@@ -784,8 +775,8 @@ def don_tables():
 # -----------------------------------------------------------------------------
 # Provide a handle to this load function
 loader(don_tables,
-             "don_don_item",
-             "don_collect",
-             "don_distribute")
+       "don_don_item",
+       "don_collect",
+       "don_distribute")
 
 # END -------------------------------------------------------------------------

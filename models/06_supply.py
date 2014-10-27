@@ -2,10 +2,6 @@
 
 """
     Supply
-
-    @author: Michael Howden (michael@sahanafoundation.org)
-    @date-created: 2010-08-16
-
     Generic Supply functionality such as catalogs and items that will be used across multiple modules
 """
 
@@ -26,8 +22,8 @@ add_component("supply_item_pack",
               supply_item="item_id")
 
 # Alternative Items as component of Items
-add_component("supply_item_alt",
-              supply_item="item_id")
+#add_component("supply_item_alt",
+#              supply_item="item_id")
 
 def supply_tables():
     """ Load the Supply Tables when needed """
@@ -39,11 +35,11 @@ def supply_tables():
     #
     tablename = "supply_brand"
     table = define_table(tablename,
-                            Field("name", length=128,
-                                  notnull=True,
-                                  unique=True),
-                            comments(),
-                            *s3_meta_fields())
+                         Field("name", length=128,
+                               notnull=True,
+                               unique=True),
+                         comments(),
+                         *s3_meta_fields())
 
     # CRUD strings
     ADD_BRAND = T("Add Brand")
@@ -95,12 +91,12 @@ def supply_tables():
     #
     tablename = "supply_catalog"
     table = define_table(tablename,
-                            Field("name", length=128,
-                                  notnull=True,
-                                  unique=True),
-                            organisation_id(),
-                            comments(),
-                            *s3_meta_fields())
+                         Field("name", length=128,
+                               notnull=True,
+                               unique=True),
+                         organisation_id(),
+                         comments(),
+                         *s3_meta_fields())
 
     # CRUD strings
     ADD_CATALOG = T("Add Catalog")
@@ -152,33 +148,33 @@ def supply_tables():
     #
     tablename = "supply_item_category"
     table = define_table(tablename,
-                            catalog_id(readable = False,
-                                       writable = False,
-                                       ),
-                            #Field("level", "integer"),
-                            Field("parent_item_category_id",
-                                  "reference supply_item_category",
-                                  label = T("Parent"),
-                                  ondelete = "RESTRICT",
-                                  readable = False,
-                                  writable = False,),
-                            Field("code", length=16,
-                                  readable = False,
-                                  writable = False,),
-                            Field("name", length=128),
-                            Field("can_be_asset", "boolean",
-                                  label=T("Resources in Category can be Assets"),
-                                  readable = False,
-                                  writable = False,),
-                            comments(),
-                            *s3_meta_fields())
+                         catalog_id(readable = False,
+                                    writable = False,
+                                    ),
+                         #Field("level", "integer"),
+                         Field("parent_item_category_id",
+                               "reference supply_item_category",
+                               label = T("Parent"),
+                               ondelete = "RESTRICT",
+                               readable = False,
+                               writable = False,),
+                         Field("code", length=16,
+                               readable = False,
+                               writable = False,),
+                         Field("name", length=128),
+                         Field("can_be_asset", "boolean",
+                               label=T("Resources in Category can be Assets"),
+                               readable = False,
+                               writable = False,),
+                         comments(),
+                         *s3_meta_fields())
 
     configure(tablename,
               orderby = table.name,
-                    list_fields = ["id",
-                                   "name",
-                                   "comments"
-                                  ])
+              list_fields = ["id",
+                             "name",
+                             "comments"
+                             ])
     
     # CRUD strings
     ADD_ITEM_CATEGORY = T("Add Resource Category")
@@ -269,8 +265,7 @@ def supply_tables():
     tablename = "supply_item"
     table = define_table(
                 tablename,
-                Field("code",
-                      length=16),
+                Field("code", length=16),
                 # Needed to auto-create a catalog_item
                 item_category_id("item_category_id",
                                  requires = IS_NULL_OR(IS_ONE_OF(db,
@@ -285,46 +280,39 @@ def supply_tables():
                       required = True,
                       length=128),
                 brand_id(),
-                Field("model",
+                Field("model", length=128,
                       label = T("Model/Type"),
-                      length=128),
-                Field("year",
-                      "integer",
+                      ),
+                Field("year", "integer",
                       label = T("Year of Manufacture")),
-                Field("um",
-                      length=128,
+                Field("um", length=128,
                       label = T("Unit of Measure"),
                       notnull=True,
                       default = "piece"),
-                Field("weight",
-                      "double",
+                Field("weight", "double",
                       label = T("Weight (kg)"),
                       ),
-                Field("length",
-                      "double",
+                Field("length", "double",
                       label = T("Length (m)"),
                       ),
-                Field("width",
-                      "double",
+                Field("width", "double",
                       label = T("Width (m)"),
                       ),
-                Field("height",
-                      "double",
+                Field("height", "double",
                       label = T("Height (m)"),
                       ),
-                Field("volume",
-                      "double",
+                Field("volume", "double",
                       label = T("Volume (m3)"),
                       ),
                 comments(), # These comments do *not* pull through to an Inventory's Items or a Request's Items
                 *s3_meta_fields())
 
     configure(tablename,
-                    list_fields = ["id",
-                                   "name",
-                                   "um",
-                                   "comments"
-                                  ])
+              list_fields = ["id",
+                             "name",
+                             "um",
+                             "comments"
+                             ])
     
     # Categories in Progress
     #table.item_category_id_0.label = T("Category")
@@ -625,6 +613,7 @@ def supply_tables():
 
         configure("supply_item",
                   orderby=db.supply_item.name)
+
         return s3_rest_controller("supply", "item",
                                   rheader=supply_item_rheader)
 
@@ -637,12 +626,11 @@ def supply_tables():
     resourcename = "catalog_item"
     tablename = "supply_catalog_item"
     table = define_table(tablename,
-                            catalog_id(),
-                            item_category_id("item_category_id",
-                                             #label = T("Group"),
-
-                                             # Filters item_category_id based on catalog_id
-                                             script =
+                         catalog_id(),
+                         item_category_id("item_category_id",
+                                          #label = T("Group"),
+                                          # Filters item_category_id based on catalog_id
+                                          script =
 SCRIPT(
 '''$(document).ready(function(){
  S3FilterFieldChange({
@@ -652,11 +640,11 @@ SCRIPT(
   'FieldResource':'item_category',
  })
 })'''),
-                                             ),
-                            item_id(script = None,
-                                    ondelete = "CASCADE"), # No Item Pack Filter
-                            comments(), # These comments do *not* pull through to an Inventory's Items or a Request's Items
-                            *s3_meta_fields())
+                                          ),
+                         item_id(script = None,
+                                 ondelete = "CASCADE"), # No Item Pack Filter
+                         comments(), # These comments do *not* pull through to an Inventory's Items or a Request's Items
+                         *s3_meta_fields())
 
     # CRUD strings
     ADD_ITEM = T("Add Catalog Resource")
@@ -822,17 +810,16 @@ SCRIPT(
     #
     tablename = "supply_item_pack"
     table = define_table(tablename,
-                            item_id(empty=False,
-                                    ondelete = "CASCADE"),
-                            Field("name", length=128,
-                                  default = T("piece"),
-                                  notnull=True), # Ideally this would reference another table for normalising Pack names
-                            Field("quantity", 
-                                  "double",
-                                  label = T("Amount of Unit of Measure"),
-                                   notnull=True),
-                            comments(),
-                            *s3_meta_fields())
+                         item_id(empty=False,
+                                 ondelete = "CASCADE"),
+                         Field("name", length=128,
+                               default = T("piece"),
+                               notnull=True), # Ideally this would reference another table for normalising Pack names
+                         Field("quantity", "double",
+                               label = T("Amount of Unit of Measure"),
+                                notnull=True),
+                         comments(),
+                         *s3_meta_fields())
 
     # CRUD strings
     ADD_ITEM_PACK = T("Add Resource Unit")
@@ -963,7 +950,8 @@ SCRIPT(
                                      "item_id",
                                     ])
 
-    configure("supply_item_pack", resolve=item_pack_duplicate)
+    configure("supply_item_pack",
+              resolve=item_pack_duplicate)
 
     # =====================================================================
     # Alternative Items
@@ -971,42 +959,40 @@ SCRIPT(
     #  If the desired item isn't found, then these are designated as
     #  suitable alternatives
     #
-    tablename = "supply_item_alt"
-    table = define_table(tablename,
-                            item_id(notnull=True),
-                            Field("quantity",
-                                  "double",
-                                  comment = DIV( _class = "tooltip",
-                                                 _title = "%s|%s" %
-                                                         (T("Quantity"),
-                                                          T("The number of Units of Measure of the Alternative Resources which is equal to One Unit of Measure of the Resource")
-                                                          )
-                                                ),
-                                  default = 1,
-                                  notnull=True),
-                            item_id("alt_item_id",
-                                    notnull=True),
-                            comments(),
-                            *s3_meta_fields())
+    #tablename = "supply_item_alt"
+    #table = define_table(tablename,
+    #                     item_id(notnull=True),
+    #                     Field("quantity", "double",
+    #                           comment = DIV(_class = "tooltip",
+    #                                         _title = "%s|%s" %
+    #                                                 (T("Quantity"),
+    #                                                  T("The number of Units of Measure of the Alternative Resources which is equal to One Unit of Measure of the Resource")
+    #                                                  )
+    #                                         ),
+    #                           default = 1,
+    #                           notnull=True),
+    #                     item_id("alt_item_id", notnull=True),
+    #                     comments(),
+    #                     *s3_meta_fields())
 
     # CRUD strings
-    ADD_ALT_ITEM = T("Add Alternative Item")
-    LIST_ALT_ITEM = T("List Alternative Items")
-    crud_strings[tablename] = Storage(
-        title_create = ADD_ALT_ITEM,
-        title_display = T("Alternative Item Details"),
-        title_list = LIST_ALT_ITEM,
-        title_update = T("Edit Alternative Item"),
-        title_search = T("Search Alternative Items"),
-        subtitle_create = T("Add New Alternative Item"),
-        subtitle_list = T("Alternative Items"),
-        label_list_button = LIST_ALT_ITEM,
-        label_create_button = ADD_ALT_ITEM,
-        label_delete_button = T("Delete Alternative Item"),
-        msg_record_created = T("Alternative Item added"),
-        msg_record_modified = T("Alternative Item updated"),
-        msg_record_deleted = T("Alternative Item deleted"),
-        msg_list_empty = T("No Alternative Items currently registered"))
+    #ADD_ALT_ITEM = T("Add Alternative Item")
+    #LIST_ALT_ITEM = T("List Alternative Items")
+    #crud_strings[tablename] = Storage(
+    #    title_create = ADD_ALT_ITEM,
+    #    title_display = T("Alternative Item Details"),
+    #    title_list = LIST_ALT_ITEM,
+    #    title_update = T("Edit Alternative Item"),
+    #    title_search = T("Search Alternative Items"),
+    #    subtitle_create = T("Add New Alternative Item"),
+    #    subtitle_list = T("Alternative Items"),
+    #    label_list_button = LIST_ALT_ITEM,
+    #    label_create_button = ADD_ALT_ITEM,
+    #    label_delete_button = T("Delete Alternative Item"),
+    #    msg_record_created = T("Alternative Item added"),
+    #    msg_record_modified = T("Alternative Item updated"),
+    #    msg_record_deleted = T("Alternative Item deleted"),
+    #    msg_list_empty = T("No Alternative Items currently registered"))
 
     #def item_alt_represent(id):
     #    try:
@@ -1057,21 +1043,20 @@ SCRIPT(
 
     # =====================================================================
     # Pass variables back to global scope (s3.*)
-    return dict (
-            item_id = item_id,
-            item_category_id = item_category_id,
-            item_pack_id = item_pack_id,
-            item_represent = item_represent,
-            concat_item_pack_quantity = concat_item_pack_quantity,
-            supply_brand_represent = supply_brand_represent,
-            item_pack_represent = item_pack_represent,
-            item_pack_virtualfields = item_pack_virtualfields,
-            resource_duplicate = resource_duplicate,
-            item_duplicate = item_duplicate,
-            supply_item_add = supply_item_add,
-            catalog_item_search = catalog_item_search,
-            supply_item_controller = supply_item_controller
-        )
+    return dict(item_id = item_id,
+                item_category_id = item_category_id,
+                item_pack_id = item_pack_id,
+                item_represent = item_represent,
+                concat_item_pack_quantity = concat_item_pack_quantity,
+                supply_brand_represent = supply_brand_represent,
+                item_pack_represent = item_pack_represent,
+                item_pack_virtualfields = item_pack_virtualfields,
+                resource_duplicate = resource_duplicate,
+                item_duplicate = item_duplicate,
+                supply_item_add = supply_item_add,
+                catalog_item_search = catalog_item_search,
+                supply_item_controller = supply_item_controller
+                )
 
 # Provide a handle to this load function
 loader(supply_tables,
@@ -1081,7 +1066,7 @@ loader(supply_tables,
        "supply_item",
        "supply_catalog_item",
        "supply_item_pack",
-       "supply_item_alt"
+       #"supply_item_alt"
        )
 
 # END =========================================================================

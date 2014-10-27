@@ -2,18 +2,11 @@
 
 """
     Supply
-
-    @author: Michael Howden (michael@sahanafoundation.org)
-    @date-created: 2010-08-16
-
     Generic Supply functionality such as catalogs and items that are used across multiple applications
 """
 
 module = request.controller
 resourcename = request.function
-
-if not (deployment_settings.has_module("inv") or deployment_settings.has_module("asset")):
-    raise HTTP(404, body="Module disabled: %s" % module)
 
 shn_menu(module)
 
@@ -45,15 +38,14 @@ def catalog_rheader(r):
     if r.representation == "html":
         catalog = r.record
         if catalog:
-            tabs = [
-                    (T("Edit Details"), None),
+            tabs = [(T("Edit Details"), None),
                     (T("Categories"), "item_category"),
                     (T("Items"), "catalog_item"),
-                   ]
+                    ]
             rheader_tabs = s3_rheader_tabs(r, tabs)
-            rheader = DIV(TABLE(TR( TH("%s: " % T("Name")), catalog.name,
+            rheader = DIV(TABLE(TR(TH("%s: " % T("Name")), catalog.name,
                                   ),
-                                TR( TH("%s: " % T("Organisation")), 
+                                TR(TH("%s: " % T("Organisation")), 
                                     organisation_represent(catalog.organisation_id),
                                   ),
                                ),
@@ -88,6 +80,7 @@ def brand():
 # =============================================================================
 def item():
     """ RESTful CRUD controller """
+
     itable = db.supply_item
     if "item_category_id" in request.vars:
         itable.item_category_id.default = request.vars.item_category_id
@@ -113,8 +106,8 @@ def item():
 
     query = (ctable.code == "FACILITY")
     record = db(query).select(ctable.id,
-                                       limitby = (0, 1),
-                                       cache = gis.cache).first()
+                              limitby = (0, 1),
+                              cache = gis.cache).first()
     if record:
         facility_cat_id = record.id
     else:
@@ -122,8 +115,8 @@ def item():
         
     query = (ctable.code == "SERVICES")
     record = db(query).select(ctable.id,
-                                       limitby = (0, 1),
-                                       cache = gis.cache).first()
+                              limitby = (0, 1),
+                              cache = gis.cache).first()
     if record:
         service_cat_id = record.id
     else:

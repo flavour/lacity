@@ -1,18 +1,12 @@
 # -*- coding: utf-8 -*-
 
 """
-    Donations (LA Specific)
-
-    @author: Michael Howden (michael@sahanafoundation.org)
-    @date-created: 2011-08-02
+    Donations
 """
 
 
 module = request.controller
 resourcename = request.function
-
-if not has_module(module):
-    raise HTTP(404, body="Module disabled: %s" % module)
 
 # Options Menu (available in all Functions)
 shn_menu(module)

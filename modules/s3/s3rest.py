@@ -65,7 +65,7 @@ import gluon.contrib.simplejson as json
 
 from s3validators import IS_ONE_OF
 from s3xml import S3XML
-from s3model import S3Model, S3RecordLinker
+from s3model import S3Model#, S3RecordLinker
 from s3export import S3Exporter
 from s3method import S3Method
 
@@ -139,7 +139,7 @@ class S3RequestManager(object):
         # Settings
         self.s3 = current.response.s3
         self.domain = current.request.env.server_name
-        self.rlink_tablename = "s3_rlink"
+        #self.rlink_tablename = "s3_rlink"
 
         self.show_urls = True
         self.show_ids = False
@@ -160,7 +160,7 @@ class S3RequestManager(object):
         self.load = self.model.load
         self.loader = self.model.loader
 
-        self.linker = S3RecordLinker(self)
+        #self.linker = S3RecordLinker(self)
         self.xml = S3XML(self)
         self.exporter = S3Exporter(self)
         self.sync = S3Sync()
@@ -1856,74 +1856,70 @@ class S3QueryBuilder(object):
         return bbox_query
 
     # -------------------------------------------------------------------------
-    def parse_url_rlinks(self, resource, vars):
-        """
-            Parse URL resource link queries. Syntax:
-            ?linked{.<component>}.<from|to>.<table>={link_class},
-                <ANY|ALL|list_of_ids>
-
-            @param resource: the resource
-            @param vars: dict of URL vars
-
-            @status: currently unused
-            @todo: deprecate?
-        """
-
-        linker = self.manager.linker
-        q = None
-
-        for k in vars:
-            if k[:7] == "linked.":
-                link = k.split(".")
-                if len(link) < 3:
-                    continue
-                else:
-                    link = link[1:]
-                o_tn = link.pop()
-                if o_tn in current.db:
-                    link_table = current.db[o_tn]
-                else:
-                    continue
-                operator = link.pop()
-                if not operator in ("from", "to"):
-                    continue
-                table = resource.table
-                join = None
-                if link and link[0] in resource.components:
-                    component = components[link[0]]
-                    table = component.table
-                    pkey, fkey = component.pkey, component.fkey
-                    join = (resource.table[pkey] == table[fkey])
-                link_class = None
-                union = False
-                val = vars[k]
-                if isinstance(val, (list, tuple)):
-                    val = ",".join(val)
-                ids = val.split(",")
-                if ids:
-                    if not ids[0].isdigit() and ids[0] not in ("ANY", "ALL"):
-                        link_class = ids.pop(0)
-                if ids:
-                    if ids.count("ANY"):
-                        link_id = None
-                        union = True
-                    elif ids.count("ALL"):
-                        link_id = None
-                    else:
-                        link_id = filter(str.isdigit, ids)
-                if operator == "from":
-                    query = linker.get_target_query(link_table, link_id, table,
-                                                    link_class=link_class,
-                                                    union=union)
-                else:
-                    query = linker.get_origin_query(table, link_table, link_id,
-                                                    link_class=link_class,
-                                                    union=union)
-                if query is not None:
-                    if join is not None:
-                        query = (join & query)
-                    q = q and (q & query) or query
-        return q
+    #def parse_url_rlinks(self, resource, vars):
+    #    """
+    #        Parse URL resource link queries. Syntax:
+    #        ?linked{.<component>}.<from|to>.<table>={link_class},
+    #            <ANY|ALL|list_of_ids>
+    #        @param resource: the resource
+    #        @param vars: dict of URL vars
+    #        @status: currently unused
+    #        @todo: deprecate?
+    #    """
+    #    linker = self.manager.linker
+    #    q = None
+    #    for k in vars:
+    #        if k[:7] == "linked.":
+    #            link = k.split(".")
+    #            if len(link) < 3:
+    #                continue
+    #            else:
+    #                link = link[1:]
+    #            o_tn = link.pop()
+    #            if o_tn in current.db:
+    #                link_table = current.db[o_tn]
+    #            else:
+    #                continue
+    #            operator = link.pop()
+    #            if not operator in ("from", "to"):
+    #                continue
+    #            table = resource.table
+    #            join = None
+    #            if link and link[0] in resource.components:
+    #                component = components[link[0]]
+    #                table = component.table
+    #                pkey, fkey = component.pkey, component.fkey
+    #                join = (resource.table[pkey] == table[fkey])
+    #            link_class = None
+    #            union = False
+    #            val = vars[k]
+    #            if isinstance(val, (list, tuple)):
+    #                val = ",".join(val)
+    #            ids = val.split(",")
+    #            if ids:
+    #                if not ids[0].isdigit() and ids[0] not in ("ANY", "ALL"):
+    #                    link_class = ids.pop(0)
+    #            if ids:
+    #                if ids.count("ANY"):
+    #                    link_id = None
+    #                    union = True
+    #                elif ids.count("ALL"):
+    #                    link_id = None
+    #                else:
+    #                    link_id = filter(str.isdigit, ids)
+    #            if operator == "from":
+    #                query = linker.get_target_query(link_table, link_id, table,
+    #                                                link_class=link_class,
+    #                                                union=union)
+    #            else:
+    #                query = linker.get_origin_query(table, link_table, link_id,
+    #                                                link_class=link_class,
+    #                                                union=union)
+    #            if query is not None:
+    #                if join is not None:
+    #                    query = (join & query)
+    #                q = q and (q & query) or query
+    #    return q
 
     # -------------------------------------------------------------------------
     def parse_url_query(self, resource, vars):

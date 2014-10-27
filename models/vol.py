@@ -159,32 +159,32 @@ def vol_tables():
 
     tablename = "vol_application"
     table = define_table(tablename,
-                            req_id(empty=False),
-                            Field("number", "integer",
-                                  default = 1,
-                                  requires = IS_NOT_EMPTY(),
-                                  readable=False,
-                                  writable=False, # Only for Volunteer Organisations
-                                  label=T("Number of Volunteers to Commit")),
-                            person_id(), # Volunteer or Team Leader (latter populated onaccept)
-                            organisation_id(readable=False,
-                                            writable=False), # Only for Volunteer Organisations
-                            human_resource_id("team_leader_id",
-                                              readable=False,
-                                              writable=False, # Only for Volunteer Organisations
-                                              label=T("Team Leader")),
-                            #Field("team_leader",
-                            #      readable = False,
-                            #      writable = False,
-                            #      label = T("Team Leader Name")),
-                            #Field("team_leader_contact",
-                            #      readable = False,
-                            #      writable = False,
-                            #      label = T("Team Leader Contact"),
-                            #      comment = DIV(_class="tooltip",
-                            #        _title="%s|%s" % (T("Team Leader Contact"),
-                            #                          T("Cell phone &/or Email")))),
-                            *(emergency_contact_fields() + s3_meta_fields()))
+                         req_id(empty=False),
+                         Field("number", "integer",
+                               default = 1,
+                               requires = IS_NOT_EMPTY(),
+                               readable=False,
+                               writable=False, # Only for Volunteer Organisations
+                               label=T("Number of Volunteers to Commit")),
+                         person_id(), # Volunteer or Team Leader (latter populated onaccept)
+                         organisation_id(readable=False,
+                                         writable=False), # Only for Volunteer Organisations
+                         human_resource_id("team_leader_id",
+                                           readable=False,
+                                           writable=False, # Only for Volunteer Organisations
+                                           label=T("Team Leader")),
+                         #Field("team_leader",
+                         #      readable = False,
+                         #      writable = False,
+                         #      label = T("Team Leader Name")),
+                         #Field("team_leader_contact",
+                         #      readable = False,
+                         #      writable = False,
+                         #      label = T("Team Leader Contact"),
+                         #      comment = DIV(_class="tooltip",
+                         #        _title="%s|%s" % (T("Team Leader Contact"),
+                         #                          T("Cell phone &/or Email")))),
+                         *(emergency_contact_fields() + s3_meta_fields()))
 
     crud_strings[tablename] = Storage(
         title_create = T("Add Application"),
@@ -369,7 +369,6 @@ def vol_tables():
 
     # -------------------------------------------------------------------------
     def vol_application_onaccept_csv(req_csv):
-
         from csv import DictReader
         csvReader = DictReader(open(req_csv, "r"))
         for r in csvReader:
@@ -386,15 +385,17 @@ def vol_tables():
         atable = db.auth_user
         query = (vtable.person_id == ptable.id) & \
                 (ptable.uuid == atable.person_uuid)
-        records = db(query).select()
+        records = db(query).select(atable.id,
+                                   vtable.person_id,
+                                   )
         for record in records:
             auth_id = record.auth_user.id
-            person_id = vtable.person_id
+            person_id = record.vol_application.person_id
 
-            query = (vtable.person_id == person)
+            query = (vtable.person_id == person_id)
             db(query).update(owned_by_user = auth_id)
 
-            query = (ctable.person_id == person)
+            query = (ctable.person_id == person_id)
             db(query).update(owned_by_user = auth_id)
 
     configure(tablename,
@@ -420,89 +421,87 @@ def vol_tables():
     visible = s3_has_role(STAFF)
     tablename = "vol_assignment"
     table = define_table(tablename,
-                            req_id(empty=False),
-                            person_id(),
-                            # Only visible to STAFF
-                            organisation_id(readable=visible,
-                                            writable=visible),
-                            Field("number", "integer",
-                                  default = 1,
-                                  readable=visible,
+                         req_id(empty=False),
+                         person_id(),
+                         # Only visible to STAFF
+                         organisation_id(readable=visible,
+                                         writable=visible),
+                         Field("number", "integer",
+                               default = 1,
+                               readable=visible,
+                               writable=visible,
+                               # @ToDo: This should vary on Role: Staff or OrgAdmin
+                               label=T("Number of Volunteers to Commit")),
+                         # Only visible for Volunteer Organisations
+                         human_resource_id("team_leader_id",
+                                           readable=False,
+                                           writable=False,
+                                           label=T("Team Leader")),
+                         # Only visible to STAFF
+                         Field("checkin", "datetime",
+                               requires = [IS_EMPTY_OR(IS_UTC_DATETIME_IN_RANGE(
+                                             maximum=request.utcnow,
+                                             error_message="%s %%(max)s!" %
+                                                 T("Enter a valid past date")))],
+                               widget = S3DateTimeWidget(past=2160, # 3 months
+                                                         future=0),
+                               represent = s3_utc_represent,
+                               readable=visible,
+                               writable=visible,
+                               label=T("Check-in")),
+                         Field("checkout", "datetime",
+                               requires = [IS_EMPTY_OR(IS_UTC_DATETIME_IN_RANGE(
+                                             maximum=request.utcnow,
+                                             error_message="%s %%(max)s!" %
+                                                 T("Enter a valid past date")))],
+                               widget = S3DateTimeWidget(past=2160, # 3 months
+                                                         future=0),
+                               represent = s3_utc_represent,
+                               readable=visible,
+                               writable=visible,
+                               label=T("Check-out")),
+                         # Visible to ALL - but only if vol has checked-in and (checked-out or time > time_until)
+                         Field("task_evaluation", "integer",
+                               requires = IS_NULL_OR(IS_IN_SET(vol_evaluation_opts)),
+                               represent = lambda i: vol_evaluation_opts.get(i,NONE),
+                              writable = False,
+                              label=T("Volunteer Evaluation")),
+                         comments("task_eval_comments",
+                                 writable = False,
+                                  label = T("Volunteer Comments"),
+                                  comment=DIV(_class="tooltip",
+                                     _title="%s|%s" % (T("Volunteer Comments"),
+                                                       T("Additional comments on this assignment.")))),
+                         # Only visible to STAFF
+                         # Defaults to version in Request
+                         human_resource_id("report_to_id",
+                                           label = T("Reported To"),
+                                           readable = visible,
+                                           writable = visible
+                                           ),
+                         Field("evaluation", "integer",
+                               readable=visible,
+                               writable=visible,
+                               requires = IS_NULL_OR(IS_IN_SET(vol_evaluation_opts)),
+                               represent = lambda i: vol_evaluation_opts.get(i,NONE) ,
+                               label=T("EMD Evaluation")),
+                         comments(readable=visible,
                                   writable=visible,
-                                  # @ToDo: This should vary on Role: Staff or OrgAdmin
-                                  label=T("Number of Volunteers to Commit")),
-                            # Only visible for Volunteer Organisations
-                            human_resource_id("team_leader_id",
-                                              readable=False,
-                                              writable=False,
-                                              label=T("Team Leader")),
-                            # Only visible to STAFF
-                            Field("checkin", "datetime",
-                                  requires = [IS_EMPTY_OR(IS_UTC_DATETIME_IN_RANGE(
-                                                maximum=request.utcnow,
-                                                error_message="%s %%(max)s!" %
-                                                    T("Enter a valid past date")))],
-                                  widget = S3DateTimeWidget(past=2160, # 3 months
-                                                            future=0),
-                                  represent = s3_utc_represent,
-                                  readable=visible,
-                                  writable=visible,
-                                  label=T("Check-in")),
-                            Field("checkout", "datetime",
-                                  requires = [IS_EMPTY_OR(IS_UTC_DATETIME_IN_RANGE(
-                                                maximum=request.utcnow,
-                                                error_message="%s %%(max)s!" %
-                                                    T("Enter a valid past date")))],
-                                  widget = S3DateTimeWidget(past=2160, # 3 months
-                                                            future=0),
-                                  represent = s3_utc_represent,
-                                  readable=visible,
-                                  writable=visible,
-                                  label=T("Check-out")),
-                            # Visible to ALL - but only if vol has checked-in and (checked-out or time > time_until)
-                            Field("task_evaluation", "integer",
-                                  requires = IS_NULL_OR(IS_IN_SET(vol_evaluation_opts)),
-                                  represent = lambda i: vol_evaluation_opts.get(i,NONE),
-                                  writable = False,
-                                  label=T("Volunteer Evaluation")),
-                            comments("task_eval_comments",
-                                     writable = False,
-                                     label = T("Volunteer Comments"),
-                                     comment=DIV(_class="tooltip",
-                                        _title="%s|%s" % (T("Volunteer Comments"),
-                                                          T("Additional comments on this assignment.")))),
-                            # Only visible to STAFF
-                            # Defaults to version in Request
-                            human_resource_id("report_to_id",
-                                              label = T("Reported To"),
-                                              readable = visible,
-                                              writable = visible
-                                              ),
-                            Field("evaluation", "integer",
-                                  readable=visible,
-                                  writable=visible,
-                                  requires = IS_NULL_OR(IS_IN_SET(vol_evaluation_opts)),
-                                  represent = lambda i: vol_evaluation_opts.get(i,NONE) ,
-                                  label=T("EMD Evaluation")),
-                            comments(readable=visible,
-                                     writable=visible,
-                                     label = T("EMD Comments"),
-                                     comment=DIV(_class="tooltip",
-                                        _title="%s|%s" % (T("EMD Comments"),
-                                                          T("Additional comments on the performance of the volunteer on this assignment.")))),
-                            Field("dnr",
-                                  "boolean",
-                                  readable=visible,
-                                  writable=visible,
-                                  # @ToDo: Not good to have this default to Off - easily skipped!
-                                  default = True,
-                                  label=T("Would you work with this volunteer again?"),
-                                  represent = rep_yes_no), 
-                            Field("emailed",
-                                  "datetime",
-                                  readable=False,
-                                  writable=False),
-                            *s3_meta_fields())
+                                  label = T("EMD Comments"),
+                                  comment=DIV(_class="tooltip",
+                                     _title="%s|%s" % (T("EMD Comments"),
+                                                       T("Additional comments on the performance of the volunteer on this assignment.")))),
+                         Field("dnr", "boolean",
+                               readable=visible,
+                               writable=visible,
+                               # @ToDo: Not good to have this default to Off - easily skipped!
+                               default = True,
+                               label=T("Would you work with this volunteer again?"),
+                               represent = rep_yes_no), 
+                         Field("emailed", "datetime",
+                               readable=False,
+                               writable=False),
+                         *s3_meta_fields())
 
     crud_strings[tablename] = Storage(
         title_create = T("Add Assignment"),

@@ -2,17 +2,10 @@
 
 """
     Event Module - Controllers
-
-    http://eden.sahanafoundation.org/wiki/BluePrintScenario
-
-    @author: Fran Boon
 """
 
 module = request.controller
 resourcename = request.function
-
-if not deployment_settings.has_module(module):
-    raise HTTP(404, body="Module disabled: %s" % module)
 
 # Options Menu (available in all Functions' Views)
 shn_menu(module)

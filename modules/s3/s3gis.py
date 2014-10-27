@@ -30,7 +30,10 @@
     OTHER DEALINGS IN THE SOFTWARE.
 """
 
-__all__ = ["GIS", "GoogleGeocoder", "YahooGeocoder"]
+__all__ = ("GIS",
+           "GoogleGeocoder",
+           "YahooGeocoder",
+           )
 
 import os
 import re

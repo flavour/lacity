@@ -7,9 +7,6 @@
 module = request.controller
 resourcename = request.function
 
-if not has_module(module):
-    raise HTTP(404, body="Module disabled: %s" % module)
-
 # Options Menu (available in all Functions)
 shn_menu(module)
 
@@ -967,6 +964,8 @@ def profile():
                 except ValueError:
                     address1 = location.addr_street
                 zip = location.addr_postcode
+                # Load model
+                load("gis_config")
                 results = gis.get_parent_per_level(None, location.id, location)
                 try:
                     city = results["L3"].name

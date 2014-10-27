@@ -2,9 +2,6 @@
 
 """
     Person super-entity
-
-    @author: nursix
-    @see: U{http://eden.sahanafoundation.org/wiki/BluePrintVITA}
 """
 
 prefix = "pr"

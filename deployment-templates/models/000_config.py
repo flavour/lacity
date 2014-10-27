@@ -139,16 +139,6 @@ deployment_settings.L10n.languages = OrderedDict([
     ("ja", "日本語"),
     ("ko", "한국어"),
     ("vi", "Tiếng Việt"),
-    #("fr", "Français"),
-    #("de", "Deutsch"),
-    #("el", "ελληνικά"),
-    #("it", "Italiano"),
-    #("pt", "Português"),
-    #("pt-br", "Português (Brasil)"),
-    #("ru", "русский"),
-    #("ar", "العربية"),
-    #("zh-cn", "中文 (简体)"),
-    #("ur", "اردو"),
 ])
 # Default language for Language Toolbar (& GIS Locations in future)
 #deployment_settings.L10n.default_language = "en"
@@ -269,28 +259,6 @@ deployment_settings.gis.default_config_values = Storage(
 #deployment_settings.gis.duplicate_features = False
 # Mouse Position: 'normal', 'mgrs' or 'off'
 #deployment_settings.gis.mouse_position = "normal"
-# Print Service URL: http://eden.sahanafoundation.org/wiki/BluePrintGISPrinting
-#deployment_settings.gis.print_service = "/geoserver/pdf/"
-# Do we have a spatial DB available? (currently unused. Will support PostGIS & Spatialite.)
-#deployment_settings.gis.spatialdb = False
-# GeoServer (Currently used by GeoExplorer. Will allow REST control of GeoServer.)
-# NB Needs to be publically-accessible URL for querying via client JS
-#deployment_settings.gis.geoserver_url = "http://localhost/geoserver"
-#deployment_settings.gis.geoserver_username = "admin"
-#deployment_settings.gis.geoserver_password = "password"
-
-# OpenStreetMap settings:
-# Register your app by logging in to www.openstreetmap.org & then selecting 'oauth settings'
-#deployment_settings.osm.oauth_consumer_key = ""
-#deployment_settings.osm.oauth_consumer_secret = ""
-
-# Twitter settings:
-# Register an app at http://twitter.com/apps
-# (select Aplication Type: Client)
-# You'll get your consumer_key and consumer_secret from Twitter
-# You can keep these empty if you don't need Twitter integration
-#deployment_settings.twitter.oauth_consumer_key = ""
-#deployment_settings.twitter.oauth_consumer_secret = ""
 
 # Use 'soft' deletes
 #deployment_settings.security.archive_not_delete = True
@@ -400,10 +368,6 @@ deployment_settings.req.req_crud_strings[3] = Storage(
     msg_record_deleted = T("Request for Volunteers Canceled"),
     msg_list_empty = T("No Requests for Volunteers"))
 
-# Inventory Management
-#deployment_settings.inv.collapse_tabs = False
-# Use the term 'Order' instead of 'Shipment'
-#deployment_settings.inv.shipment_name = "order"
 # Human Resource Management
 #deployment_settings.hrm.email_required = False
 
@@ -474,11 +438,11 @@ deployment_settings.modules = OrderedDict([
             restricted = True,
             module_type = None, # Not displayed
         )),
-    ("inv", Storage(
-            name_nice = T("Donations Management"),
-            restricted = True,
-            module_type = 3
-        )),
+    #("inv", Storage(
+    #        name_nice = T("Donations Management"),
+    #        restricted = True,
+    #        module_type = 3
+    #    )),
     ("req", Storage(
             name_nice = T("Requests"),
             restricted = True,
@@ -490,7 +454,7 @@ deployment_settings.modules = OrderedDict([
             restricted = True,
             module_type = 10,
         )),
-    # Don depends on Inv & Req
+    # Don depends on Supply & Req
     ("don", Storage(
             name_nice = T("Donate"),
             restricted = True,

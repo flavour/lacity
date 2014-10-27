@@ -3,10 +3,6 @@
 """
     Request Management
 
-    @author: Michael Howden (michael@sahanafoundation.org)
-    @author: Fran Boon
-    @date-created: 2010-08-16
-
     A module to record requests & commitments for:
      - inventory items
      - people (actually request skills, but commit people)
@@ -547,8 +543,6 @@ def req_tables():
             # Commit Status -> Loan
             db(db.req_commit.req_id == req_id).update(status = 8)
 
-
-
     # -------------------------------------------------------------------------
     def req_ondelete(form):
         """
@@ -560,32 +554,31 @@ def req_tables():
 
 
     configure(tablename,
-                onaccept = req_onaccept,
-                onvalidation = req_onvalidation,
-                ondelete = req_ondelete,
-                #listadd = False,
-                insertable = not deployment_settings.get_req_webeoc_is_master(),
-                editable = not deployment_settings.get_req_webeoc_is_master(),
-                deletable = not deployment_settings.get_req_webeoc_is_master(),
-                #deployment_settings.get_req_webeoc_is_master()
-                # Set in the controller to be varied based on type
-                #list_fields = ["id",
-                #               "type",
-                #               "priority",
-                #               "commit_status",
-                #               #"transit_status",
-                #               "fulfil_status",
-                #               "date_required",
-                #               "event_id",
-                #               "site_id",
-                #               (T("Item"), "item"),
-                #               (T("Quantity"), "item_quantity"),
-                #               #"request_number",
-                #               #"date",
-                #               #"requester_id",
-                #               #"comments",
-                #            ]
-                )
+              onaccept = req_onaccept,
+              onvalidation = req_onvalidation,
+              ondelete = req_ondelete,
+              #listadd = False,
+              insertable = not deployment_settings.get_req_webeoc_is_master(),
+              editable = not deployment_settings.get_req_webeoc_is_master(),
+              deletable = not deployment_settings.get_req_webeoc_is_master(),
+              # Set in the controller to be varied based on type
+              #list_fields = ["id",
+              #               "type",
+              #               "priority",
+              #               "commit_status",
+              #               #"transit_status",
+              #               "fulfil_status",
+              #               "date_required",
+              #               "event_id",
+              #               "site_id",
+              #               (T("Item"), "item"),
+              #               (T("Quantity"), "item_quantity"),
+              #               #"request_number",
+              #               #"date",
+              #               #"requester_id",
+              #               #"comments",
+              #            ]
+              )
 
     #----------------------------------------------------------------------
     def req_create_form_mods():
@@ -670,7 +663,7 @@ def req_tables():
         output = dict()
 
         # Load Models (for tabs at least)
-        load("inv_inv_item")
+        #load("inv_inv_item")
         #if has_module("hrm"):
         #    # Load Models (for tabs at least)
         #    load("hrm_skill")
@@ -726,7 +719,7 @@ def req_tables():
         """
 
         # Load Models (for tabs at least)
-        load("inv_inv_item")
+        #load("inv_inv_item")
 
         site_id = r.vars.site_id
         site_name = shn_site_represent(site_id, show_link = False)
@@ -759,8 +752,8 @@ def req_tables():
 
         # Get req_items & inv_items from this site
         table = db.req_req_item
-        query = (table.req_id == r.id ) & \
-                (table.deleted == False )
+        query = (table.req_id == r.id) & \
+                (table.deleted == False)
         req_items = db(query).select(table.id,
                                      table.item_id,
                                      table.quantity,
@@ -768,13 +761,13 @@ def req_tables():
                                      table.quantity_commit,
                                      table.quantity_transit,
                                      table.quantity_fulfil)
-        itable = db.inv_inv_item
-        query = (itable.site_id == site_id ) & \
-                (itable.deleted == False )
-        inv_items = db(query).select(itable.item_id,
-                                     itable.quantity,
-                                     itable.item_pack_id)
-        inv_items_dict = inv_items.as_dict(key = "item_id")
+        #itable = db.inv_inv_item
+        #query = (itable.site_id == site_id) & \
+        #        (itable.deleted == False)
+        #inv_items = db(query).select(itable.item_id,
+        #                             itable.quantity,
+        #                             itable.item_pack_id)
+        #inv_items_dict = inv_items.as_dict(key = "item_id")
 
         if len(req_items):
             items = TABLE(THEAD(TR(#TH(""),
@@ -837,7 +830,7 @@ def req_tables():
         return output
 
     set_method(module, "req",
-                           method = "check", action=req_check)
+               method = "check", action=req_check)
 
     # ---------------------------------------------------------------------
     def req_quantity_represent(quantity, type):
@@ -859,8 +852,7 @@ def req_tables():
     quantities_writable = deployment_settings.get_req_quantities_writable()
     table = define_table(tablename,
                             req_id(),
-                            Field("item",
-                                  "text",
+                            Field("item", "text",
                                   label=T("Requested Resource"),
                                   length=150,
                                   requires = IS_NOT_EMPTY(),
@@ -870,11 +862,10 @@ def req_tables():
                                                                   ),
                                                 )
                                   ),
-                            Field( "item_pack",
-                                   label = T("Resource Unit")
-                                   ),
-                            Field("specs",
-                                  "text",
+                            Field("item_pack",
+                                  label = T("Resource Unit")
+                                  ),
+                            Field("specs", "text",
                                   label=T("Specifications"),
                                   length=350,
                                   comment = DIV(_class="tooltip",
@@ -883,21 +874,22 @@ def req_tables():
                                                                   ),
                                                 )
                                   ),
-                            item_category_id( label = "Look Up Catalog Category",
-                                              comment = DIV(_class="tooltip",
+                            item_category_id(label = "Look Up Catalog Category",
+                                             comment = DIV(_class="tooltip",
                                                    _title="%s|%s" % (T("Look Up Catalog Category"),
                                                                      T("Look Up Catalog Category in Give2LA for Resource Requested in WebEOC")
                                                                      ),
-                                                ),),
-                            item_id( label=T("Match To Catalog Resource"),
-                                     requires = IS_NULL_OR(IS_ONE_OF(db, "supply_item.id",
-                                                                      supply_item_represent,
-                                                                      sort=True)),
-                                     comment = DIV(_class="tooltip",
-                                                   _title="%s|%s" % (T("Match To Catalog Resource"),
-                                                                     T("Match Resource Requested in WebEOC to Catalog Resource in Give2LA.")
-                                                                     ),
-                                                ),
+                                              ),
+                                              ),
+                            item_id(label=T("Match To Catalog Resource"),
+                                    requires = IS_NULL_OR(IS_ONE_OF(db, "supply_item.id",
+                                                                    supply_item_represent,
+                                                                     sort=True)),
+                                    comment = DIV(_class="tooltip",
+                                                  _title="%s|%s" % (T("Match To Catalog Resource"),
+                                                                    T("Match Resource Requested in WebEOC to Catalog Resource in Give2LA.")
+                                                                    ),
+                                               ),
                                     script = SCRIPT(
 '''S3FilterFieldChange({
 'FilterField':'item_category_id',
@@ -908,40 +900,37 @@ def req_tables():
                                      widget = None,
                                      ),
                             item_pack_id(label = T("Unit")),
-                            Field( "quantity",
-                                   "double",
-                                   notnull = True),
+                            Field("quantity", "double",
+                                  notnull = True),
                             site_id,
-                            Field( "quantity_commit",
-                                   "double",
-                                   label = T("Quantity Donated"),
-                                   represent = lambda quantity_commit: \
+                            Field("quantity_commit",
+                                  "double",
+                                  label = T("Quantity Donated"),
+                                  represent = lambda quantity_commit: \
                                     req_quantity_represent(quantity_commit,
                                                            "commit"),
-                                   default = 0,
-                                   readable = False,
-                                   writable = False,
-                                   #writable = quantities_writable
-                                   ),
-                            Field( "quantity_transit",
-                                   "double",
-                                   label = T("Quantity in Transit"),
-                                   represent = lambda quantity_transit: \
+                                  default = 0,
+                                  readable = False,
+                                  writable = False,
+                                  #writable = quantities_writable
+                                  ),
+                            Field("quantity_transit", "double",
+                                  label = T("Quantity in Transit"),
+                                  represent = lambda quantity_transit: \
                                     req_quantity_represent(quantity_transit,
                                                            "transit"),
-                                   default = 0,
-                                   writable = quantities_writable),
-                            Field( "quantity_fulfil",
-                                   "double",
-                                   label = T("Quantity Received"),
-                                   represent = lambda quantity_fulfil: \
+                                  default = 0,
+                                  writable = quantities_writable),
+                            Field("quantity_fulfil", "double",
+                                  label = T("Quantity Received"),
+                                  represent = lambda quantity_fulfil: \
                                     req_quantity_represent(quantity_fulfil,
                                                            "fulfil"),
-                                   default = 0,
-                                   readable = False,
-                                   writable = False,
-                                   #writable = quantities_writable
-                                   ),
+                                  default = 0,
+                                  readable = False,
+                                  writable = False,
+                                  #writable = quantities_writable
+                                  ),
                             #comments("surplus_instruct",
                             #         label = T("Instruction for Surplus Items")),
                             comments(),
@@ -986,20 +975,20 @@ def req_tables():
             return None
 
     # Reusable Field
-    req_item_id = S3ReusableField( "req_item_id",
-                                   db.req_req_item,
-                                   requires = IS_NULL_OR(IS_ONE_OF(db,
-                                                                   "req_req_item.id",
-                                                                   req_item_represent,
-                                                                   orderby="req_req_item.id",
-                                                                   sort=True)),
-                                   represent = req_item_represent,
-                                   label = T("Request Resource"),
-                                   comment = DIV( _class="tooltip",
-                                                  _title="%s|%s" % (T("Request Resource"),
-                                                                    T("Select Resources from the Request"))),
-                                   ondelete = "CASCADE",
-                                   script = SCRIPT(
+    req_item_id = S3ReusableField("req_item_id",
+                                  db.req_req_item,
+                                  requires = IS_NULL_OR(IS_ONE_OF(db,
+                                                                  "req_req_item.id",
+                                                                  req_item_represent,
+                                                                  orderby="req_req_item.id",
+                                                                  sort=True)),
+                                  represent = req_item_represent,
+                                  label = T("Request Resource"),
+                                  comment = DIV(_class="tooltip",
+                                                _title="%s|%s" % (T("Request Resource"),
+                                                                  T("Select Resources from the Request"))),
+                                  ondelete = "CASCADE",
+                                  script = SCRIPT(
 '''$(document).ready(function(){
  S3FilterFieldChange({
   'FilterField':'req_item_id',
@@ -1074,37 +1063,36 @@ def req_tables():
         db(db.req_req.id == req_id).update(**status_update)
 
     configure(tablename,
-                onaccept=req_item_onaccept,
-                #create_next = URL(c="req",
-                #                  # Shows the inventory items which match a requested item
-                #                  # @ToDo: Make this page a component of req_item
-                #                  f="req_item_inv_item",
-                #                  args=["[id]"]),
-                deletable = multiple_req_items,
-                list_fields = ["id",
-                               "item_id",
-                               "item_pack_id",
-                               "site_id",
-                               "quantity",
-                               "quantity_commit",
-                               "quantity_transit",
-                               "quantity_fulfil",
-                               "comments",
-                            ])
+              onaccept=req_item_onaccept,
+              #create_next = URL(c="req",
+              #                  # Shows the inventory items which match a requested item
+              #                  # @ToDo: Make this page a component of req_item
+              #                  f="req_item_inv_item",
+              #                  args=["[id]"]),
+              deletable = multiple_req_items,
+              list_fields = ["id",
+                             "item_id",
+                             "item_pack_id",
+                             "site_id",
+                             "quantity",
+                             "quantity_commit",
+                             "quantity_transit",
+                             "quantity_fulfil",
+                             "comments",
+                             ])
 
     # -----------------------------------------------------------------
     # Surplus Items
     tablename = "req_surplus_item"
     quantities_writable = deployment_settings.get_req_quantities_writable()
     table = define_table(tablename,
-                            req_id(),
-                            item_id(writable = False),
-                            item_pack_id(writable = False),
-                            Field( "quantity_surplus",
-                                   "double"),
-                            human_resource_id(label = T("Recipient of Surplus Resources")),
-                            comments(),
-                            *s3_meta_fields())
+                         req_id(),
+                         item_id(writable = False),
+                         item_pack_id(writable = False),
+                         Field("quantity_surplus", "double"),
+                         human_resource_id(label = T("Recipient of Surplus Resources")),
+                         comments(),
+                         *s3_meta_fields())
 
     # pack_quantity virtual field
     table.virtualfields.append(item_pack_virtualfields(tablename = tablename))
@@ -2231,8 +2219,7 @@ def req_tables():
         """
         if has_module("req") and \
             auth.s3_has_permission("read", db.req_req):
-            return [
-                    (T("Requests"), "req"),
+            return [(T("Requests"), "req"),
                     (T("Match Requests"), "req_match/"),
                     (T("Commit"), "commit")
                     ]
@@ -2268,7 +2255,7 @@ loader(req_tables,
        "req_commit",
        "req_commit_item",
        "req_commit_person",
-       "project_task_req",
+       #"project_task_req",
        )
 
 # -----------------------------------------------------------------------------

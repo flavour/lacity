@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 
-""" S3 Situations
-
-    @author: nursix
-
+"""
+    S3 Situations
 """
 
 prefix = "sit"
@@ -32,7 +30,7 @@ s3mgr.configure(tablename, editable=False, deletable=False, listadd=False)
 #
 trackable_types = Storage(
     pr_person = T("Person"),
-    dvi_body = T("Dead Body")
+    #dvi_body = T("Dead Body")
 )
 
 tablename = "sit_trackable"
