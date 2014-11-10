@@ -345,11 +345,11 @@ def don_tables():
         canvas.drawCentredString((doc.pagesize[0]-width/2)-0.75*inch,
                                  0.70*inch,
                                  "James G. Featherstone"
-                                )
+                                 )
         canvas.drawCentredString((doc.pagesize[0]-width/2)-0.75*inch,
                                  0.50*inch,
                                  "General Manager"
-                                )
+                                 )
         canvas.restoreState()
 
     # -------------------------------------------------------------------------

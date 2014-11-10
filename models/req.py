@@ -12,7 +12,7 @@
 
 module = "req"
 
-# -------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # NB Hardcoded in controllers/req.py & models/vol.py
 REQ_STATUS_NONE       = 0
 REQ_STATUS_PARTIAL    = 1
@@ -105,36 +105,27 @@ def req_tables():
                                  writable = deployment_settings.get_req_status_writable(),
                                 )
 
-    req_priority_opts = {
-        3:T("High"),
-        2:T("Medium"),
-        1:T("Low")
-    }
+    req_priority_opts = {3: T("High"),
+                         2: T("Medium"),
+                         1: T("Low")
+                         }
 
-    req_type_opts = {
-        9:T("Other")
-    }
+    req_type_opts = {9 :T("Other"),
+                     }
 
-     # Number hardcoded in controller
+    # Number hardcoded in controller
     req_type_opts[1] = deployment_settings.get_req_type_inv_label()
-    #if has_module("asset"):
-    #    req_type_opts[2] = T("Assets")
     req_type_opts[3] = deployment_settings.get_req_type_hrm_label()
-    #if has_module("cr"):
-    #    req_type_opts[4] = T("Shelter")
 
     def req_priority_represent(id):
-        req_priority_color = {
-            3:"red",
-            2:"darkorange",
-            1:"black"
-        }
-        #src = "/%s/static/img/priority/priority_%d.gif" % \
-        #          (request.application, (id or 4))
+        req_priority_color = {3: "red",
+                              2: "darkorange",
+                              1: "black"
+                              }
         return SPAN(req_priority_opts[id],
                     _style = "color:%s" % req_priority_color[id])
 
-    # ---------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def req_hide_quantities(table):
         """
             Hide the Update Quantity Status Fields from Request create forms
@@ -145,16 +136,16 @@ def req_tables():
             table.quantity_transit.writable = table.quantity_transit.readable= False
             table.quantity_fulfil.writable = table.quantity_fulfil.readable = False
 
-    # ---------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Requests
-    eoc_req_status_opts = {2:T("Pending (Action Required)"), # Red
-                           3:T("Pushed to BOC"), # Yellow
-                           4:T("Approved (Pushed to BOC)"), # Gray
-                           5:T("Cancelled"), # Gray
-                           6:T("Cancelled (Pushed to BOC)"), # Gray
-                           7:T("Committed"), # Green
-                           8:T("Loan"), # Yellow
-                           9:T("Fulfilled") # Green
+    eoc_req_status_opts = {2: T("Pending (Action Required)"), # Red
+                           3: T("Pushed to BOC"), # Yellow
+                           4: T("Approved (Pushed to BOC)"), # Gray
+                           5: T("Cancelled"), # Gray
+                           6: T("Cancelled (Pushed to BOC)"), # Gray
+                           7: T("Committed"), # Green
+                           8: T("Loan"), # Yellow
+                           9: T("Fulfilled") # Green
                            }
 
     eoc_req_status_color = {2: "DarkRed",
@@ -171,174 +162,173 @@ def req_tables():
         represent = eoc_req_status_opts.get(opt, NONE)
         color = eoc_req_status_color.get(opt)
         if color:
-            represent = SPAN(represent, _style = "font-weight:bold; color:%s;" % color)
+            represent = SPAN(represent, _style = "font-weight:bold;color:%s;" % color)
         return represent
 
     tablename = "req_req"
     table = define_table(tablename,
-                            Field("status",
-                                  "integer",
-                                  label = T("EOC Status"),
-                                  requires = IS_IN_SET(eoc_req_status_opts),
-                                  represent = eoc_req_status_represent,
-                                  default = 2,
+                         Field("status", "integer",
+                               default = 2,
+                               label = T("EOC Status"),
+                               represent = eoc_req_status_represent,
+                               requires = IS_IN_SET(eoc_req_status_opts),
+                               ),
+                         event_id(default = session.s3.event,
+                                  empty = False,
                                   ),
-                            event_id(default=session.s3.event,
-                                     empty = False),
-                            incident_id(empty = False),
-                            Field("type", "integer",
-                                  requires = IS_IN_SET(req_type_opts, zero=None),
-                                  represent = lambda opt: req_type_opts.get(opt, UNKNOWN_OPT),
-                                  label = T("Request Type")),
-                            Field("request_number",
-                                  unique = True,
-                                  label = T("Request Number")),
-                            Field("priority",
-                                  "integer",
-                                  default = 2,
-                                  label = T("Request Priority"),
-                                  represent = req_priority_represent,
-                                  requires = IS_NULL_OR(
-                                                IS_IN_SET(req_priority_opts))
-                                  ),
-                            Field("date_required",
-                                  "datetime",
-                                  label = T("Date Required"),
-                                  requires = IS_EMPTY_OR(IS_UTC_DATETIME()),
-                                              # Can be done in onvalidation if-required, or we could rely on the widget
-                                              #IS_UTC_DATETIME_IN_RANGE(
-                                              #  minimum=request.utcnow - datetime.timedelta(days=1),
-                                              #  error_message="%s %%(min)s!" %
-                                              #      T("Enter a valid future date"))),
-                                  widget = S3DateTimeWidget(past=0,
+                         incident_id(empty = False),
+                         Field("type", "integer",
+                               default = 1,
+                               label = T("Request Type"),
+                               represent = lambda opt: req_type_opts.get(opt, UNKNOWN_OPT),
+                               requires = IS_IN_SET(req_type_opts, zero=None),
+                               ),
+                         Field("request_number", unique = True,
+                               label = T("Request Number"),
+                               ),
+                         Field("priority", "integer",
+                               default = 2,
+                               label = T("Request Priority"),
+                               represent = req_priority_represent,
+                               requires = IS_NULL_OR(
+                                            IS_IN_SET(req_priority_opts))
+                               ),
+                         Field("date_required", "datetime",
+                               label = T("Date Required"),
+                               represent = s3_utc_represent,
+                               requires = IS_EMPTY_OR(IS_UTC_DATETIME()),
+                                           # Can be done in onvalidation if-required, or we could rely on the widget
+                                           #IS_UTC_DATETIME_IN_RANGE(
+                                           #  minimum=request.utcnow - datetime.timedelta(days=1),
+                                           #  error_message="%s %%(min)s!" %
+                                           #      T("Enter a valid future date"))),
+                               widget = S3DateTimeWidget(past=0,
                                                             future=8760),  # Hours, so 1 year
-                                  represent = s3_utc_represent),
-                            Field("date_required_until",
-                                  "datetime",
-                                  label = T("Date Required Until"),
-                                  requires = IS_EMPTY_OR(IS_UTC_DATETIME()),
-                                              #IS_UTC_DATETIME_IN_RANGE(
-                                              #  minimum=request.utcnow - datetime.timedelta(days=1),
-                                              #  error_message="%s %%(min)s!" %
-                                              #      T("Enter a valid future date"))),
-                                  widget = S3DateTimeWidget(past=0,
-                                                            future=8760), # Hours, so 1 year
-                                  represent = s3_utc_represent,
-                                  #readable = False,
-                                  #writable = False
-                                  ),
-                            super_link(db.org_site,
-                                       label = T("Requested For Facility"),
-                                       default = auth.user.site_id if auth.is_logged_in() else None,
-                                       readable = True,
-                                       writable = True,
-                                       empty = False,
-                                       represent = shn_site_represent,
-                                       widget = S3SiteAutocompleteWidget(),
-                            ),
-                            Field("location",
-                                  label = T("Neighborhood"),
-                                  readable = False,
-                                  writable = False),
-                            human_resource_id("request_for_id",
-                                              label = T("Requested For"),
-                                              empty = False,
-                                              #default = s3_logged_in_human_resource()
-                                              ),
-                            Field("purpose",
-                                  "text",
-                                  label=T("Purpose"),
-                                  requires = IS_NOT_EMPTY(),
-                                  length=300,
-                                  comment = DIV(_class="tooltip",
-                                                _title="%s|%s" % (T("Details"),
-                                                                  T("300 character limit.")
-                                                                  ),
-                                                )
-                                  ), # Donations: What will the Items be used for?; People: Task Details
-                            Field("date", # DO NOT CHANGE THIS
-                                  "datetime",
-                                  label = T("Date Requested"),
-                                  required = True,
-                                  requires = IS_EMPTY_OR(IS_UTC_DATETIME()),
-                                              #IS_UTC_DATETIME_IN_RANGE(
-                                              #  maximum=request.utcnow,
-                                              #  error_message="%s %%(max)s!" %
-                                              #      T("Enter a valid past date")))],
-                                  widget = S3DateTimeWidget(past=8760, # Hours, so 1 year
-                                                            future=0),
-                                  default = request.utcnow,
-                                  represent = s3_utc_represent),
-                            human_resource_id("requester_id",
-                                              label = T("Requester"),
-                                              empty = False,
-                                              default = s3_logged_in_human_resource(),
-                                              comment = T("Person who initially requested this resource")
-                                              ),
-                            # Not used for LA
-                            human_resource_id("assigned_to_id", # This field should be in req_commit, but that complicates the UI
-                                              readable=False,
-                                              writable=False,
-                                              label = T("Assigned To")),
-                            human_resource_id("approved_by_id",
-                                              empty = False,
-                                              label = T("Approved By")),
-                            Field("public",
-                                  "boolean",
-                                  label = T("Publish to Public Site?"),
-                                  readable = False,
-                                  writable = False),
-                            organisations_id(label = T("Publish to Organizations"),
-                                             comment = DIV(_class="tooltip",
-                                                           _title="%s|%s" % (T("Publish to Organizations"),
-                                                                             T("If you select an Organization(s) here then they will be notified of this request. Organizations will also be able to see any requests publshed to the public site."))),
-                                             readable = False,
-                                             writable = False,
-                                             requires = IS_NULL_OR(IS_ONE_OF(db, "org_organisation.id",
-                                                              organisation_represent,
-                                                              multiple=True,
-                                                              orderby="org_organisation.name",
-                                                              filterby="has_vols",
-                                                              filter_opts=(True,),
-                                                              sort=True)),
-                                            ),
-                            req_status("commit_status",
-                                       label = T("Commit. Status"),
-                                       readable=False,
-                                       writable=False,
-                                       ),
-                            req_status("transit_status",
-                                       label = T("Transit Status"),
-                                       readable=False,
-                                       writable=False,
-                                       ),
-                            req_status("fulfil_status",
-                                       label = T("Fulfil. Status"),
-                                       readable=False,
-                                       writable=False,
-                                       ),
-                            comments(),
-                            Field("cancel",
-                                  "boolean",
-                                  label = T("Cancel"),
-                                  default = False,
-                                  represent = lambda value: T("Yes") if value else T("No"),
-                                  ),
-                            Field("roster_lead_time",
-                                  "double",
-                                  default=2,
-                                  readable=False,
-                                  writable=False,   # Only editable via WebEOC
-                                  label=T("Send Volunteer Roster Time")),
-                            Field("emailed",
-                                  "datetime",
-                                  readable=False,
-                                  writable=False,
-                                  represent = s3_utc_represent,
-                                  label=T("Time that Roster was emailed")),
-                            *s3_meta_fields())
-
-    table.type.default = 1
+                               ),
+                         Field("date_required_until", "datetime",
+                               label = T("Date Required Until"),
+                               represent = s3_utc_represent,
+                               requires = IS_EMPTY_OR(IS_UTC_DATETIME()),
+                                           #IS_UTC_DATETIME_IN_RANGE(
+                                           #  minimum=request.utcnow - datetime.timedelta(days=1),
+                                           #  error_message="%s %%(min)s!" %
+                                           #      T("Enter a valid future date"))),
+                               widget = S3DateTimeWidget(past=0,
+                                                         future=8760), # Hours, so 1 year
+                               #readable = False,
+                               #writable = False
+                               ),
+                         super_link(db.org_site,
+                                    default = auth.user.site_id if auth.is_logged_in() else None,
+                                    empty = False,
+                                    label = T("Requested For Facility"),
+                                    represent = shn_site_represent,
+                                    readable = True,
+                                    writable = True,
+                                    widget = S3SiteAutocompleteWidget(),
+                                    ),
+                         Field("location",
+                               label = T("Neighborhood"),
+                               readable = False,
+                               writable = False,
+                               ),
+                         human_resource_id("request_for_id",
+                                           #default = s3_logged_in_human_resource()
+                                           empty = False,
+                                           label = T("Requested For"),
+                                           ),
+                         Field("purpose", "text", length=300,
+                               label = T("Purpose"),
+                               requires = IS_NOT_EMPTY(),
+                               comment = DIV(_class="tooltip",
+                                             _title="%s|%s" % (T("Details"),
+                                                               T("300 character limit.")
+                                                               ),
+                                             )
+                               ), # Donations: What will the Items be used for?; People: Task Details
+                         Field("date", # DO NOT CHANGE THIS
+                               "datetime",
+                               default = request.utcnow,
+                               label = T("Date Requested"),
+                               represent = s3_utc_represent,
+                               required = True,
+                               requires = IS_EMPTY_OR(IS_UTC_DATETIME()),
+                                           #IS_UTC_DATETIME_IN_RANGE(
+                                           #  maximum=request.utcnow,
+                                           #  error_message="%s %%(max)s!" %
+                                           #      T("Enter a valid past date")))],
+                               widget = S3DateTimeWidget(past=8760, # Hours, so 1 year
+                                                         future=0),
+                               ),
+                         human_resource_id("requester_id",
+                                           default = s3_logged_in_human_resource(),
+                                           empty = False,
+                                           label = T("Requester"),
+                                           comment = T("Person who initially requested this resource")
+                                           ),
+                         # Not used for LA
+                         human_resource_id("assigned_to_id", # This field should be in req_commit, but that complicates the UI
+                                           label = T("Assigned To"),
+                                           readable = False,
+                                           writable = False,
+                                           ),
+                         human_resource_id("approved_by_id",
+                                           empty = False,
+                                           label = T("Approved By"),
+                                           ),
+                         Field("public", "boolean",
+                               label = T("Publish to Public Site?"),
+                               readable = False,
+                               writable = False,
+                               ),
+                         organisations_id(label = T("Publish to Organizations"),
+                                          comment = DIV(_class="tooltip",
+                                                        _title="%s|%s" % (T("Publish to Organizations"),
+                                                                          T("If you select an Organization(s) here then they will be notified of this request. Organizations will also be able to see any requests publshed to the public site."))),
+                                          readable = False,
+                                          writable = False,
+                                          requires = IS_NULL_OR(IS_ONE_OF(db, "org_organisation.id",
+                                                           organisation_represent,
+                                                           multiple=True,
+                                                           orderby="org_organisation.name",
+                                                           filterby="has_vols",
+                                                           filter_opts=(True,),
+                                                           sort=True)),
+                                         ),
+                         req_status("commit_status",
+                                    label = T("Commit. Status"),
+                                    readable = False,
+                                    writable = False,
+                                    ),
+                         req_status("transit_status",
+                                    label = T("Transit Status"),
+                                    readable = False,
+                                    writable = False,
+                                    ),
+                         req_status("fulfil_status",
+                                    label = T("Fulfil. Status"),
+                                    readable = False,
+                                    writable = False,
+                                    ),
+                         comments(),
+                         Field("cancel", "boolean",
+                               default = False,
+                               label = T("Cancel"),
+                               represent = lambda value: T("Yes") if value else T("No"),
+                               ),
+                         Field("roster_lead_time", "double",
+                               default=2,
+                               label = T("Send Volunteer Roster Time"),
+                               readable = False,
+                               writable = False,   # Only editable via WebEOC
+                               ),
+                         Field("emailed", "datetime",
+                               label = T("Time that Roster was emailed"),
+                               represent = s3_utc_represent,
+                               readable = False,
+                               writable = False,
+                               ),
+                         *s3_meta_fields())
 
     # Virtual Field
     class req_virtualfields(dict, object):
@@ -432,6 +422,9 @@ def req_tables():
 
     # Reusable Field
     req_id = S3ReusableField("req_id", db.req_req, sortby="date",
+                             label = T("Request"),
+                             ondelete = "CASCADE",
+                             represent = req_represent,
                              requires = IS_ONE_OF(db,
                                                   "req_req.id",
                                                   lambda id:
@@ -439,11 +432,9 @@ def req_tables():
                                                                   False),
                                                   orderby="req_req.date",
                                                   sort=True),
-                             represent = req_represent,
-                             label = T("Request"),
-                             ondelete = "CASCADE")
+                             )
 
-    #----------------------------------------------------------------------
+    #--------------------------------------------------------------------------
     def req_onvalidation(form):
 
         if "id" not in form.vars:
@@ -463,85 +454,105 @@ def req_tables():
             if office:
                 form.vars.location = office.postcode
 
-    #----------------------------------------------------------------------
+    #--------------------------------------------------------------------------
     def req_onaccept(form):
         """
+            Configure the next page to go to based on the request type
             When a new request is created:
-                Configure the next page to go to based on the request type
                 Schedule rostermail to run (Vol requests only)
+                Add a new Commit record
+            When a request is updated:
+                Update req_commit.status based on req_req.status
         """
 
+        form_vars = form.vars
+        req_id = form_vars.id
+
         table = db.req_req
+
+        # Read the record details
+        record = db(table.id == req_id).select(table.date_required,
+                                               table.location,
+                                               table.purpose,
+                                               table.status,
+                                               table.type,
+                                               limitby=(0, 1)).first()
 
         # Configure the next page to go to based on the request type
         tablename = "req_req"
         if "default_type" in request.get_vars:
             type = request.get_vars.default_type
         else:
-            type = form.vars.type
+            type = form_vars.type
 
         if type is None:
-            type = db(table.id == form.vars.id).select(table.type,
-                                                       limitby=(0, 1)).first()
-            if type:
-                type = str(type.type)
+            type = str(record.type)
 
+        controller = request.controller
         if type == "1":
             configure(tablename,
-                        create_next = URL(c=request.controller,
-                                          f="req",
-                                          args=["[id]", "req_item"]),
-                        update_next = URL(c=request.controller,
-                                          f="req",
-                                          args=["[id]", "req_item"]))
+                      create_next = URL(c=controller,
+                                        f="req",
+                                        args=["[id]", "req_item"]),
+                      update_next = URL(c=controller,
+                                        f="req",
+                                        args=["[id]", "req_item"]))
         elif type == "3":
             configure(tablename,
-                        create_next = URL(c=request.controller,
-                                          f="req",
-                                          args=["[id]", "req_skill"]),
-                        update_next = URL(c=request.controller,
-                                          f="req",
-                                          args=["[id]", "req_skill"]))
-            if form.vars.date_required:
+                      create_next = URL(c=controller,
+                                        f="req",
+                                        args=["[id]", "req_skill"]),
+                      update_next = URL(c=controller,
+                                        f="req",
+                                        args=["[id]", "req_skill"]))
+            if form_vars.date_required:
                 # Schedule rostermail to run
-                if form.vars.roster_lead_time:
-                    lead_time = form.vars.roster_lead_time
+                if form_vars.roster_lead_time:
+                    lead_time = form_vars.roster_lead_time
                 else:
                     lead_time = 2
                 lead_time = datetime.timedelta(hours=lead_time)
-                mailout_time = form.vars.date_required - lead_time
+                mailout_time = form_vars.date_required - lead_time
 
                 current.s3task.schedule_task("vol_rostermail",
-                                             args=[form.vars.id],
+                                             args=[form_vars.id],
                                              start_time=mailout_time)
+            # Update all the 'Virtual' Fields in the vol_assignment records
+            load("vol_assignment")
+            atable = db.vol_assignment
+            db(atable.req_id == req_id).update(date_required = s3_utc_represent(record.date_required),
+                                               location = record.location,
+                                               task = record.purpose,
+                                               )
 
         # Automatically update req_commit.status based on req_req.status
-        req_id = form.vars.id
-        req_status = table[req_id].status
-        commit_record = db(db.req_commit.req_id == req_id).select(db.req_commit.status,
-                                                                  limitby=(0,1)).first()
+        req_status = record.status
+        ctable = db.req_commit
+        commit_record = db(ctable.req_id == req_id).select(ctable.status,
+                                                           limitby=(0,1)
+                                                           ).first()
         if commit_record:
             commit_status = commit_record.status
         else:
             # Add New Commit Record
-            db.req_commit.insert()
-            commit_status = 2 #Pending (Action Required)
+            ctable.insert()
+            commit_status = 2 # Pending (Action Required)
 
         # BOC Receives EOC update on Donation Approval or Cancellation and changes BOC Status
         # BOC Receives EOC update on Donation Cancellation and changes BOC Status
         # BOC Receives EOC Status update on fulfillment and changes BOC Status
         # BOC Receives EOC Status update on return of loan and changes BOC Status
-        if (req_status in (4,6) and  commit_status in (11,12) ) \
+        if (req_status in (4, 6) and  commit_status in (11, 12)) \
         or (req_status == 6 and commit_status == 13) \
         or (req_status == 9 and commit_status == 13) \
         or (req_status == 9 and commit_status == 8):
             # Commit Status -> Pending (Action Required)
-            db(db.req_commit.req_id == req_id).update(status = 2)
+            db(ctable.req_id == req_id).update(status = 2)
 
-        #BOC Receives EOC Status on receipt of loan and changes BOC Status
+        # BOC Receives EOC Status on receipt of loan and changes BOC Status
         if req_status == 8 and commit_status == 13:
             # Commit Status -> Loan
-            db(db.req_commit.req_id == req_id).update(status = 8)
+            db(ctable.req_id == req_id).update(status = 8)
 
     # -------------------------------------------------------------------------
     def req_ondelete(form):
@@ -553,14 +564,15 @@ def req_tables():
             current.s3task.async("vol_req_cancel", [form.vars.id])
 
 
+    webeoc_is_master = deployment_settings.get_req_webeoc_is_master()
     configure(tablename,
+              deletable = not webeoc_is_master,
+              editable = not webeoc_is_master,
+              insertable = not webeoc_is_master,
+              #listadd = False,
               onaccept = req_onaccept,
               onvalidation = req_onvalidation,
               ondelete = req_ondelete,
-              #listadd = False,
-              insertable = not deployment_settings.get_req_webeoc_is_master(),
-              editable = not deployment_settings.get_req_webeoc_is_master(),
-              deletable = not deployment_settings.get_req_webeoc_is_master(),
               # Set in the controller to be varied based on type
               #list_fields = ["id",
               #               "type",
@@ -580,12 +592,13 @@ def req_tables():
               #            ]
               )
 
-    #----------------------------------------------------------------------
+    #--------------------------------------------------------------------------
     def req_create_form_mods():
         """
             Function to be called from REST prep functions
              - main module & components (sites & events)
         """
+
         # Hide fields which don't make sense in a Create form
         table = db.req_req
         table.commit_status.readable = table.commit_status.writable = False
@@ -652,7 +665,7 @@ def req_tables():
          T("Details field is required!"))
         )
 
-    # ---------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def req_match():
         """
             Function to be called from controller functions to display all
@@ -678,10 +691,10 @@ def req_tables():
             return output
         site_id = db[tablename][id].site_id
         s3.actions = [dict(url = URL(c = request.controller,
-                                              f = "req",
-                                              args = ["[id]","check"],
-                                              vars = {"site_id": site_id}
-                                             ),
+                                     f = "req",
+                                     args = ["[id]","check"],
+                                     vars = {"site_id": site_id}
+                                     ),
                                     _class = "action-btn",
                                     label = str(T("Check")),
                                     ),
@@ -712,7 +725,7 @@ def req_tables():
 
         return output
 
-    # ---------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def req_check(r, **attr):
         """
             Check to see if your Inventory can be used to match any open Requests
@@ -832,109 +845,110 @@ def req_tables():
     set_method(module, "req",
                method = "check", action=req_check)
 
-    # ---------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def req_quantity_represent(quantity, type):
-            # @ToDo: There should be better control of this feature - currently this only works
-            #        with req_items which are being matched by commit / send / recv
-            if quantity and not deployment_settings.get_req_quantities_writable():
-                return TAG[""]( quantity,
-                                A(DIV(_class = "quantity %s ajax_more collapsed" % type
-                                      ),
-                                    _href = "#",
-                                  )
-                                )
-            else:
-                return quantity
+        # @ToDo: There should be better control of this feature - currently this only works
+        #        with req_items which are being matched by commit / send / recv
+        if quantity and not deployment_settings.get_req_quantities_writable():
+            return TAG[""]( quantity,
+                            A(DIV(_class = "quantity %s ajax_more collapsed" % type
+                                  ),
+                                _href = "#",
+                              )
+                            )
+        else:
+            return quantity
 
-    # =====================================================================
+    # =========================================================================
     # Request Items
     tablename = "req_req_item"
     quantities_writable = deployment_settings.get_req_quantities_writable()
     table = define_table(tablename,
-                            req_id(),
-                            Field("item", "text",
-                                  label=T("Requested Resource"),
-                                  length=150,
-                                  requires = IS_NOT_EMPTY(),
-                                  comment = DIV(_class="tooltip",
-                                                _title="%s|%s" % (T("Requested Resource"),
-                                                                  T("From WebEOC.")
+                         req_id(),
+                         Field("item", "text",
+                               label = T("Requested Resource"),
+                               length = 150,
+                               requires = IS_NOT_EMPTY(),
+                               comment = DIV(_class="tooltip",
+                                             _title="%s|%s" % (T("Requested Resource"),
+                                                               T("From WebEOC.")
+                                                               ),
+                                             )
+                               ),
+                         Field("item_pack",
+                               label = T("Resource Unit")
+                               ),
+                         Field("specs", "text",
+                               label=T("Specifications"),
+                               length=350,
+                               comment = DIV(_class="tooltip",
+                                             _title="%s|%s" % (T("Specifications"),
+                                                               T("300 character limit.")
+                                                               ),
+                                             )
+                               ),
+                         item_category_id(label = "Look Up Catalog Category",
+                                          comment = DIV(_class="tooltip",
+                                                _title="%s|%s" % (T("Look Up Catalog Category"),
+                                                                  T("Look Up Catalog Category in Give2LA for Resource Requested in WebEOC")
                                                                   ),
-                                                )
-                                  ),
-                            Field("item_pack",
-                                  label = T("Resource Unit")
-                                  ),
-                            Field("specs", "text",
-                                  label=T("Specifications"),
-                                  length=350,
-                                  comment = DIV(_class="tooltip",
-                                                _title="%s|%s" % (T("Specifications"),
-                                                                  T("300 character limit.")
-                                                                  ),
-                                                )
-                                  ),
-                            item_category_id(label = "Look Up Catalog Category",
-                                             comment = DIV(_class="tooltip",
-                                                   _title="%s|%s" % (T("Look Up Catalog Category"),
-                                                                     T("Look Up Catalog Category in Give2LA for Resource Requested in WebEOC")
-                                                                     ),
-                                              ),
-                                              ),
-                            item_id(label=T("Match To Catalog Resource"),
-                                    requires = IS_NULL_OR(IS_ONE_OF(db, "supply_item.id",
-                                                                    supply_item_represent,
-                                                                     sort=True)),
-                                    comment = DIV(_class="tooltip",
-                                                  _title="%s|%s" % (T("Match To Catalog Resource"),
-                                                                    T("Match Resource Requested in WebEOC to Catalog Resource in Give2LA.")
-                                                                    ),
-                                               ),
-                                    script = SCRIPT(
+                                           ),
+                                           ),
+                         item_id(label=T("Match To Catalog Resource"),
+                                 requires = IS_NULL_OR(IS_ONE_OF(db, "supply_item.id",
+                                                                 supply_item_represent,
+                                                                  sort=True)),
+                                 comment = DIV(_class="tooltip",
+                                               _title="%s|%s" % (T("Match To Catalog Resource"),
+                                                                 T("Match Resource Requested in WebEOC to Catalog Resource in Give2LA.")
+                                                                 ),
+                                            ),
+                                 script = SCRIPT(
 '''S3FilterFieldChange({
 'FilterField':'item_category_id',
 'Field':'item_id',
 'FieldResource':'item',
 'FieldPrefix':'supply',
 })'''),
-                                     widget = None,
-                                     ),
-                            item_pack_id(label = T("Unit")),
-                            Field("quantity", "double",
-                                  notnull = True),
-                            site_id,
-                            Field("quantity_commit",
-                                  "double",
-                                  label = T("Quantity Donated"),
-                                  represent = lambda quantity_commit: \
+                                  widget = None,
+                                  ),
+                         item_pack_id(label = T("Unit")),
+                         Field("quantity", "double",
+                               notnull = True,
+                               ),
+                         site_id,
+                         Field("quantity_commit", "double",
+                               default = 0,
+                               label = T("Quantity Donated"),
+                               represent = lambda quantity_commit: \
                                     req_quantity_represent(quantity_commit,
                                                            "commit"),
-                                  default = 0,
-                                  readable = False,
-                                  writable = False,
-                                  #writable = quantities_writable
-                                  ),
-                            Field("quantity_transit", "double",
-                                  label = T("Quantity in Transit"),
-                                  represent = lambda quantity_transit: \
-                                    req_quantity_represent(quantity_transit,
-                                                           "transit"),
-                                  default = 0,
-                                  writable = quantities_writable),
-                            Field("quantity_fulfil", "double",
-                                  label = T("Quantity Received"),
-                                  represent = lambda quantity_fulfil: \
-                                    req_quantity_represent(quantity_fulfil,
-                                                           "fulfil"),
-                                  default = 0,
-                                  readable = False,
-                                  writable = False,
-                                  #writable = quantities_writable
-                                  ),
-                            #comments("surplus_instruct",
-                            #         label = T("Instruction for Surplus Items")),
-                            comments(),
-                            *s3_meta_fields())
+                               readable = False,
+                               writable = False,
+                               #writable = quantities_writable
+                               ),
+                         Field("quantity_transit", "double",
+                               default = 0,
+                               label = T("Quantity in Transit"),
+                               represent = lambda quantity_transit: \
+                                 req_quantity_represent(quantity_transit,
+                                                        "transit"),
+                               writable = quantities_writable,
+                               ),
+                         Field("quantity_fulfil", "double",
+                               default = 0,
+                               label = T("Quantity Received"),
+                               represent = lambda quantity_fulfil: \
+                                req_quantity_represent(quantity_fulfil,
+                                                       "fulfil"),
+                               readable = False,
+                               writable = False,
+                               #writable = quantities_writable
+                               ),
+                         #comments("surplus_instruct",
+                         #         label = T("Instruction for Surplus Items")),
+                         comments(),
+                         *s3_meta_fields())
 
     table.site_id.label = T("Requested From")
 
@@ -963,7 +977,7 @@ def req_tables():
         msg_record_deleted = T("Request Resource deleted"),
         msg_list_empty = T("No Request Resources currently registered"))
 
-    # -----------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def req_item_represent (id):
         query = (db.req_req_item.id == id) & \
                 (db.req_req_item.item_id == db.supply_item.id)
@@ -1063,7 +1077,6 @@ def req_tables():
         db(db.req_req.id == req_id).update(**status_update)
 
     configure(tablename,
-              onaccept=req_item_onaccept,
               #create_next = URL(c="req",
               #                  # Shows the inventory items which match a requested item
               #                  # @ToDo: Make this page a component of req_item
@@ -1079,9 +1092,11 @@ def req_tables():
                              "quantity_transit",
                              "quantity_fulfil",
                              "comments",
-                             ])
+                             ],
+              onaccept = req_item_onaccept,
+              )
 
-    # -----------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Surplus Items
     tablename = "req_surplus_item"
     quantities_writable = deployment_settings.get_req_quantities_writable()
@@ -1116,17 +1131,17 @@ def req_tables():
         msg_record_deleted = T("Surplus Resource Deleted"),
         msg_list_empty = T("No Surplus Resources currently Recorded"))
 
-    # =====================================================================
+    # =========================================================================
     if has_module("doc"):
-        # -----------------------------------------------------------------
+
         # Documents Link Table
         load("doc_document")
         document_id = s3.document_id
 
         tablename = "req_document"
         table = define_table(tablename,
-                                req_id(),
-                                document_id())
+                             req_id(),
+                             document_id())
 
         crud_strings[tablename] = Storage(
             title_create = T("Add Document"),
@@ -1145,57 +1160,57 @@ def req_tables():
             msg_record_deleted = T("Document removed"),
             msg_list_empty = T("No Documents currently attached to this request"))
 
-    # =====================================================================
+    # =========================================================================
     # Request Skills
 
     tablename = "req_req_skill"
     skill_quantities_writable = deployment_settings.get_req_skill_quantities_writable()
     table = define_table(tablename,
-                            req_id(),
-                            # @ToDo: Add a minimum competency rating?
-                            Field("quantity",
-                                  "integer",
-                                  default = 1,
-                                  label = T("Number of People Required"),
-                                  notnull = True),
-                            multi_skill_id(label=T("Required Skills"),
-                                           comment = T("Leave blank to request an unskilled person")
-                                          ),
-                            site_id,
-                            Field("quantity_commit",
-                                  "integer",
-                                  label = T("Number of People Assigned"),
-                                  #represent = lambda quantity_commit: \
-                                   #req_quantity_represent(quantity_commit,
-                                   #                       "commit"),
-                                  default = 0,
-                                  writable = skill_quantities_writable),
-                            # Not used in LA
-                            Field("quantity_transit",
-                                  "integer",
-                                  readable = False,
-                                  writable = False,
-                                  #writable = skill_quantities_writable,
-                                  label = T("Quantity in Transit"),
-                                  #represent = lambda quantity_transit: \
-                                  # req_quantity_represent(quantity_transit,
-                                  #                        "transit"),
-                                  default = 0),
-                            Field("quantity_fulfil",
-                                  "integer",
-                                  label = T("Number of People Checked In"),
-                                  #represent = lambda quantity_fulfil: \
-                                  #  req_quantity_represent(quantity_fulfil,
-                                  #                         "fulfil"),
-                                  default = 0,
-                                  writable = skill_quantities_writable),
-                            comments(label = T("Additional Information"),
-                                     length = 300,
-                                     comment = DIV(_class="tooltip",
-                                                   _title="%s|%s|%s" % (T("Additional Information"),
-                                                                        T("Include any special requirements such as equipment which they need to bring, specific location, parking, accessibility."),
-                                                                        T("300 character limit.")))),
-                            *s3_meta_fields())
+                         req_id(),
+                         # @ToDo: Add a minimum competency rating?
+                         Field("quantity", "integer",
+                               default = 1,
+                               label = T("Number of People Required"),
+                               notnull = True,
+                               ),
+                         multi_skill_id(label = T("Required Skills"),
+                                        comment = T("Leave blank to request an unskilled person")
+                                        ),
+                         site_id,
+                         Field("quantity_commit", "integer",
+                               label = T("Number of People Assigned"),
+                               #represent = lambda quantity_commit: \
+                                #req_quantity_represent(quantity_commit,
+                                #                       "commit"),
+                               default = 0,
+                               writable = skill_quantities_writable,
+                               ),
+                         # Not used in LA
+                         Field("quantity_transit", "integer",
+                               default = 0,
+                               label = T("Quantity in Transit"),
+                               readable = False,
+                               writable = False,
+                               #writable = skill_quantities_writable,
+                               #represent = lambda quantity_transit: \
+                               # req_quantity_represent(quantity_transit,
+                               #                        "transit"),
+                               ),
+                         Field("quantity_fulfil", "integer",
+                               default = 0,
+                               label = T("Number of People Checked In"),
+                               #represent = lambda quantity_fulfil: \
+                               #  req_quantity_represent(quantity_fulfil,
+                               #                         "fulfil"),
+                               writable = skill_quantities_writable,
+                               ),
+                         comments(label = T("Additional Information"),
+                                  length = 300,
+                                  comment = DIV(_class="tooltip",
+                                                _title="%s|%s|%s" % (T("Additional Information"),
+                                                                     T("Include any special requirements such as equipment which they need to bring, specific location, parking, accessibility."),
+                                                                     T("300 character limit.")))),
+                         *s3_meta_fields())
 
     table.site_id.label = T("Requested From")
 
@@ -1338,7 +1353,7 @@ def req_tables():
         msg_no_match = msg_no_match
         )
 
-    # ---------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def req_skill_represent (id):
         rstable = db.req_req_skill
         hstable = db.hrm_skill
@@ -1360,7 +1375,7 @@ def req_tables():
     #                            req_id(),
     #                            *s3_meta_fields())
 
-    # ---------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def req_skill_onaccept(form):
         """
             Update req_req. commit_status, transit_status, fulfil_status
@@ -1412,7 +1427,7 @@ def req_tables():
         query = (table.id == req_id)
         db(query).update(**status_update)
 
-    # ---------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def req_skill_create_onaccept(form):
         """
             Send a notification to registered users which match the requested skill
@@ -1472,13 +1487,14 @@ def req_tables():
             current.s3task.async("notify_vols", [req_id])
 
     configure("req_req_skill",
-                    onaccept=req_skill_onaccept,
-                    create_onaccept=req_skill_create_onaccept,
-                    insertable = not deployment_settings.get_req_webeoc_is_master(),
-                    editable = not deployment_settings.get_req_webeoc_is_master(),
-                    deletable = multiple_req_items and not deployment_settings.get_req_webeoc_is_master())
+              create_onaccept = req_skill_create_onaccept,
+              deletable = multiple_req_items and not webeoc_is_master,
+              editable = not webeoc_is_master,
+              insertable = not webeoc_is_master,
+              onaccept = req_skill_onaccept,
+              )
 
-    # ---------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def req_skill_controller():
         """
             Request Controller - unused for LA
@@ -1489,7 +1505,8 @@ def req_tables():
         table = db[tablename]
 
         configure(tablename,
-                  insertable=False)
+                  insertable = False,
+                  )
 
         if not s3_has_role(STAFF):
             req_table = db.req_req
@@ -1511,18 +1528,18 @@ def req_tables():
                 #~((vtable.req_id == table.req_id) & (vtable.person_id == person))
 
             configure(tablename,
-                        list_fields=["id",
-                                     (T("Task"), "task"),
-                                     (T("Date + Time"), "date"),
-                                     "skill_id",
-                                     # @ToDo: If-needed, VirtualField
-                                     #"priority",
-                                     (T("Location"), "location"),
-                                     #(T("Number of Volunteers Needed (Still Needed/Total Needed)"), "needed"),
-                                     (T("Number of Volunteers Still Needed"), "needed"),
-                                     #"quantity",
-                                     "comments"
-                                    ])
+                      list_fields=["id",
+                                   (T("Task"), "task"),
+                                   (T("Date + Time"), "date"),
+                                   "skill_id",
+                                   # @ToDo: If-needed, VirtualField
+                                   #"priority",
+                                   (T("Location"), "location"),
+                                   #(T("Number of Volunteers Needed (Still Needed/Total Needed)"), "needed"),
+                                   (T("Number of Volunteers Still Needed"), "needed"),
+                                   #"quantity",
+                                   "comments"
+                                   ])
             actions = [
                     dict(url = URL(c = "vol",
                                    f = "req",
@@ -2071,7 +2088,7 @@ def req_tables():
     configure(tablename,
               onaccept = commit_item_onaccept)
 
-    # =====================================================================
+    # =========================================================================
     # Committed Persons
 
     tablename = "req_commit_person"
@@ -2103,7 +2120,7 @@ def req_tables():
         msg_record_deleted = T("Person removed from Commitment"),
         msg_list_empty = T("No People currently committed"))
 
-    # -----------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def commit_person_onaccept(form):
         table = db.req_commit_person
 
@@ -2135,7 +2152,7 @@ def req_tables():
     #configure(tablename,
     #          onaccept = commit_person_onaccept)
 
-    # =====================================================================
+    # =========================================================================
     # Fulfillment
 
     tablename = "req_fulfill"

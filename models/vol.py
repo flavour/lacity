@@ -8,19 +8,19 @@ module = "vol"
 
 # Component definitions should be outside conditional model loads
 add_component("vol_assignment",
-              req_req=dict(joinby="req_id",
-                           multiple=True))
+              req_req = dict(joinby="req_id",
+                             multiple=True))
 add_component("vol_application",
-              req_req=dict(joinby="req_id",
-                           multiple=True))
+              req_req = dict(joinby="req_id",
+                             multiple=True))
 
 # This resource is usually only accessed via a custom form
 add_component("vol_organisation",
-              pr_pentity=dict(joinby=super_key(db.pr_pentity),
-                              multiple=False))
+              pr_pentity = dict(joinby=super_key(db.pr_pentity),
+                                multiple=False))
 
 add_component("vol_skill",
-              pr_person="person_id")
+              pr_person = "person_id")
 
 
 def vol_tables():
@@ -33,7 +33,7 @@ def vol_tables():
     tablename = "vol_organisation"
     table = define_table(tablename,
                          pe_id,
-                         organisations_id(requires=IS_NULL_OR(
+                         organisations_id(requires = IS_NULL_OR(
                                             IS_ONE_OF(db, "org_organisation.id",
                                                       "%(name)s",
                                                       multiple=True,
@@ -58,8 +58,8 @@ def vol_tables():
                          person_id(),
                          multi_skill_id(label="%s (%s)" % (T("Skills"),
                                                            T("select all that apply"))),
-                         comments(label=T("Please enter any other additional skills & information"),
-                                  comment=DIV(_class="tooltip",
+                         comments(label = T("Please enter any other additional skills & information"),
+                                  comment = DIV(_class="tooltip",
                                     _title="%s|%s" % (T("Additional Skills & Information"),
                                                       T("Please enter any other additional skills you have which are not on the list or other information which may be relevant for your volunteer assignments, such as any special needs that you have.")))),
                          *s3_meta_fields())
@@ -85,14 +85,17 @@ def vol_tables():
     # A Volunteer's Emergency Contacts
     # -------------------------------------------------------------------------
     emergency_contact_name = S3ReusableField("emergency_contact_name",
+                                             label = T("Emergency Contact Name"),
                                              requires = IS_NOT_EMPTY(),
-                                             label=T("Emergency Contact Name"))
+                                             )
     emergency_contact_relationship = S3ReusableField("emergency_contact_relationship",
+                                                     label = T("Emergency Contact Relationship"),
                                                      requires = IS_NOT_EMPTY(),
-                                                     label=T("Emergency Contact Relationship"))
+                                                     )
     emergency_contact_phone = S3ReusableField("emergency_contact_phone",
+                                              label = T("Emergency Contact Phone Number"),
                                               requires = shn_single_phone_requires,
-                                              label=T("Emergency Contact Phone Number"))
+                                              )
     def emergency_contact_fields():
         return (emergency_contact_name(),
                 emergency_contact_relationship(),
@@ -159,20 +162,22 @@ def vol_tables():
 
     tablename = "vol_application"
     table = define_table(tablename,
-                         req_id(empty=False),
+                         req_id(empty = False),
                          Field("number", "integer",
                                default = 1,
+                               label = T("Number of Volunteers to Commit"),
                                requires = IS_NOT_EMPTY(),
-                               readable=False,
-                               writable=False, # Only for Volunteer Organisations
-                               label=T("Number of Volunteers to Commit")),
+                               readable = False,
+                               writable = False, # Only for Volunteer Organisations
+                               ),
                          person_id(), # Volunteer or Team Leader (latter populated onaccept)
-                         organisation_id(readable=False,
-                                         writable=False), # Only for Volunteer Organisations
+                         organisation_id(readable = False,
+                                         writable = False), # Only for Volunteer Organisations
                          human_resource_id("team_leader_id",
-                                           readable=False,
-                                           writable=False, # Only for Volunteer Organisations
-                                           label=T("Team Leader")),
+                                           label = T("Team Leader"),
+                                           readable = False,
+                                           writable = False, # Only for Volunteer Organisations
+                                           ),
                          #Field("team_leader",
                          #      readable = False,
                          #      writable = False,
@@ -418,89 +423,118 @@ def vol_tables():
             return T("Yes")
         else:
             return T("No")
-    visible = s3_has_role(STAFF)
+    is_staff = s3_has_role(STAFF)
     tablename = "vol_assignment"
     table = define_table(tablename,
-                         req_id(empty=False),
+                         req_id(ondelete = "SET NULL",
+                                readable = False,
+                                writable = False,
+                                ),
+                         # Copy the req details to these fields so that we can retain them when the request is deleted (e.g. during archival)
+                         Field("task",
+                               label = T("Task"),
+                               readable = not is_staff,
+                               writable = False,
+                               ),
+                         Field("location",
+                               label = T("Location"),
+                               readable = not is_staff,
+                               writable = False,
+                               ),
+                         Field("date_required",
+                               label = T("Date Required"),
+                               readable = not is_staff,
+                               writable = False,
+                               ),
                          person_id(),
                          # Only visible to STAFF
-                         organisation_id(readable=visible,
-                                         writable=visible),
+                         organisation_id(readable = is_staff,
+                                         writable = is_staff),
                          Field("number", "integer",
                                default = 1,
-                               readable=visible,
-                               writable=visible,
                                # @ToDo: This should vary on Role: Staff or OrgAdmin
-                               label=T("Number of Volunteers to Commit")),
+                               label = T("Number of Volunteers to Commit"),
+                               readable = is_staff,
+                               writable = is_staff,
+                               ),
                          # Only visible for Volunteer Organisations
                          human_resource_id("team_leader_id",
-                                           readable=False,
-                                           writable=False,
-                                           label=T("Team Leader")),
+                                           label = T("Team Leader"),
+                                           readable = False,
+                                           writable = False,
+                                           ),
                          # Only visible to STAFF
                          Field("checkin", "datetime",
+                               label = T("Check-in"),
+                               represent = s3_utc_represent,
                                requires = [IS_EMPTY_OR(IS_UTC_DATETIME_IN_RANGE(
                                              maximum=request.utcnow,
                                              error_message="%s %%(max)s!" %
                                                  T("Enter a valid past date")))],
                                widget = S3DateTimeWidget(past=2160, # 3 months
                                                          future=0),
-                               represent = s3_utc_represent,
-                               readable=visible,
-                               writable=visible,
-                               label=T("Check-in")),
+                               readable = is_staff,
+                               writable = is_staff,
+                               ),
                          Field("checkout", "datetime",
+                               label = T("Check-out"),
+                               represent = s3_utc_represent,
                                requires = [IS_EMPTY_OR(IS_UTC_DATETIME_IN_RANGE(
                                              maximum=request.utcnow,
                                              error_message="%s %%(max)s!" %
                                                  T("Enter a valid past date")))],
                                widget = S3DateTimeWidget(past=2160, # 3 months
                                                          future=0),
-                               represent = s3_utc_represent,
-                               readable=visible,
-                               writable=visible,
-                               label=T("Check-out")),
+                               readable = is_staff,
+                               writable = is_staff,
+                               ),
                          # Visible to ALL - but only if vol has checked-in and (checked-out or time > time_until)
                          Field("task_evaluation", "integer",
-                               requires = IS_NULL_OR(IS_IN_SET(vol_evaluation_opts)),
+                               label = T("Volunteer Evaluation"),
                                represent = lambda i: vol_evaluation_opts.get(i,NONE),
-                              writable = False,
-                              label=T("Volunteer Evaluation")),
+                               requires = IS_NULL_OR(IS_IN_SET(vol_evaluation_opts)),
+                               writable = False,
+                               ),
                          comments("task_eval_comments",
-                                 writable = False,
                                   label = T("Volunteer Comments"),
                                   comment=DIV(_class="tooltip",
                                      _title="%s|%s" % (T("Volunteer Comments"),
-                                                       T("Additional comments on this assignment.")))),
+                                                       T("Additional comments on this assignment."))),
+                                  writable = False,
+                                  ),
                          # Only visible to STAFF
                          # Defaults to version in Request
                          human_resource_id("report_to_id",
                                            label = T("Reported To"),
-                                           readable = visible,
-                                           writable = visible
+                                           readable = is_staff,
+                                           writable = is_staff
                                            ),
                          Field("evaluation", "integer",
-                               readable=visible,
-                               writable=visible,
+                               label = T("EMD Evaluation"),
+                               represent = lambda i: vol_evaluation_opts.get(i, NONE) ,
                                requires = IS_NULL_OR(IS_IN_SET(vol_evaluation_opts)),
-                               represent = lambda i: vol_evaluation_opts.get(i,NONE) ,
-                               label=T("EMD Evaluation")),
-                         comments(readable=visible,
-                                  writable=visible,
-                                  label = T("EMD Comments"),
+                               readable = is_staff,
+                               writable = is_staff,
+                               ),
+                         comments(label = T("EMD Comments"),
+                                  readable = is_staff,
+                                  writable = is_staff,
                                   comment=DIV(_class="tooltip",
                                      _title="%s|%s" % (T("EMD Comments"),
-                                                       T("Additional comments on the performance of the volunteer on this assignment.")))),
+                                                       T("Additional comments on the performance of the volunteer on this assignment."))),
+                                  ),
                          Field("dnr", "boolean",
-                               readable=visible,
-                               writable=visible,
-                               # @ToDo: Not good to have this default to Off - easily skipped!
                                default = True,
-                               label=T("Would you work with this volunteer again?"),
-                               represent = rep_yes_no), 
+                               label = T("Would you work with this volunteer again?"),
+                               readable = is_staff,
+                               writable = is_staff,
+                               # @ToDo: Not good to have this default to Off - easily skipped!
+                               represent = rep_yes_no,
+                               ),
                          Field("emailed", "datetime",
-                               readable=False,
-                               writable=False),
+                               readable = False,
+                               writable = False,
+                               ),
                          *s3_meta_fields())
 
     crud_strings[tablename] = Storage(
@@ -508,7 +542,7 @@ def vol_tables():
         title_display = T("Assignment Details"),
         title_list = T("Assignments"),
         #title_update = T("Edit Assignment"),
-        title_update = T("Evaluation of Assignment") if visible else T("Please rate this volunteer assignment"),
+        title_update = T("Evaluation of Assignment") if is_staff else T("Please rate this volunteer assignment"),
         title_search = T("Search Assignments"),
         subtitle_create = T("Add Assignment"),
         subtitle_list = T("Assignments"),
@@ -521,75 +555,15 @@ def vol_tables():
         msg_no_match = T("Currently no assignments defined"),
         msg_list_empty = T("Currently no assignments defined"))
 
-    # Virtual Fields
-    class assign_virtualfields(dict, object):
-        # Fields to be loaded by sqltable as qfields
-        # without them being list_fields
-        # (These cannot contain VirtualFields)
-        extra_fields = ["req_id"]
-
-        def location(self):
-            rtable = db.req_req
-            # Prevent recursive queries
-            #rtable.virtualfields = []
-            try:
-                query = (rtable.id == self.vol_assignment.req_id)
-            except AttributeError:
-                # We are being instantiated inside one of the other methods
-                return None
-            req = db(query).select(rtable.location,
-                                   limitby=(0, 1),
-                                   cache=gis.cache).first()
-            if req:
-                return req.location
-            else:
-                return None
-
-        def task(self):
-            rtable = db.req_req
-            # Prevent recursive queries
-            #rtable.virtualfields = []
-            try:
-                query = (rtable.id == self.vol_assignment.req_id)
-            except AttributeError:
-                # We are being instantiated inside one of the other methods
-                return None
-            req = db(query).select(rtable.purpose,
-                                   limitby=(0, 1),
-                                   cache=gis.cache).first()
-            if req:
-                return req.purpose
-            else:
-                return None
-
-        def date_required(self):
-            rtable = db.req_req
-            # Prevent recursive queries
-            #rtable.virtualfields = []
-            try:
-                query = (rtable.id == self.vol_assignment.req_id)
-            except AttributeError:
-                # We are being instantiated inside one of the other methods
-                return None
-            req = db(query).select(rtable.date_required,
-                                   limitby=(0, 1),
-                                   cache=gis.cache).first()
-            if req:
-                return s3_utc_represent(req.date_required)
-            else:
-                return None
-
-    table.virtualfields.append(assign_virtualfields())
-
-    if s3_has_role(STAFF):
+    if is_staff:
         # Use default fields
         pass
     else:
         if s3_has_role(ORG_VOL):
             list_fields = ["id",
-                           (T("Task"), "task"),
-                           (T("Location"), "location"),
-                           (T("Date Required"), "date_required"),
+                           "task",
+                           "location",
+                           "date_required",
                            (T("Reported To"), "report_to_id"),
                            "number",
                            "checkin",
@@ -598,16 +572,17 @@ def vol_tables():
         else:
             # Volunteer
             list_fields = ["id",
-                           (T("Task"), "task"),
-                           (T("Location"), "location"),
-                           (T("Date Required"), "date_required"),
+                           "task",
+                           "location",
+                           "date_required",
                            (T("Reported To"), "report_to_id"),
                            "checkin",
                            "checkout",
                            ]
 
         configure(tablename,
-                  list_fields=list_fields)
+                  list_fields = list_fields,
+                  )
 
     # -------------------------------------------------------------------------
     def assignment_onvalidate(form):
@@ -654,12 +629,12 @@ def vol_tables():
             if available < commit:
                 form.vars.number = available
                 session.information = T("Only %s volunteers are required. The commitment total has been reduced." % available)
-        return
 
     # -------------------------------------------------------------------------
     def assignment_onaccept(form):
         """
             Assign ownership of assignments to the assigned volunteer
+            Populate the 'Virtual' fields
             Update the req_commit status
         """
 
@@ -701,8 +676,17 @@ def vol_tables():
             db(rstable.req_id == req_id).update(quantity_commit = qty)
             rrtable = db.req_req
             db(rrtable.id == req_id).update(commit_status = commit_status)
-
-        return
+            # Read the Request details
+            record = db(rrtable.id == req_id).select(rrtable.date_required,
+                                                     rrtable.location,
+                                                     rrtable.purpose,
+                                                     limitby=(0, 1)
+                                                     ).first()
+            # Update the 'Virtual' fields
+            db(vastable.id == record_id).update(date_required = s3_utc_represent(record.date_required),
+                                                location = record.location,
+                                                task = record.purpose,
+                                                )
 
     # -------------------------------------------------------------------------
     def assignment_onupdate(form):
@@ -822,15 +806,13 @@ def vol_tables():
         crud_strings[atable._tablename].update(
             msg_record_deleted = T("Your application has been successfully withdrawn"))
 
-    listadd = s3_has_role(STAFF)
-
     configure(tablename,
-              onvalidation = assignment_onvalidate,
               create_onaccept = assignment_onaccept,
-              update_onaccept = assignment_onupdate,
-              ondelete = assignment_ondelete,
               delete_next = URL(c="vol", f="req_skill"),
-              listadd = listadd,
+              listadd = is_staff,
+              ondelete = assignment_ondelete,
+              onvalidation = assignment_onvalidate,
+              update_onaccept = assignment_onupdate,
               )
 
     # -------------------------------------------------------------------------
@@ -1743,14 +1725,14 @@ def vol_tables():
             if record.checkout != None: #and record.task_evaluation != None:
                 configure("vol_assignment",
                           callback = volunteerCertificate,
-                          formname = T("Volunteer Certificate"),
+                          formname = str(T("Volunteer Certificate")),
                           header = volCertBorder,
                           footer = lambda x, y: None,
                           )
             else:
                 configure("vol_assignment",
                           callback = assignmentPDF,
-                          formname = T("Volunteer Assignment Form"),
+                          formname = str(T("Volunteer Assignment Form")),
                           footer = lambda x, y: None
                           )
 
@@ -1780,7 +1762,7 @@ def vol_tables():
             if r.component.count():
                 configure("vol_assignment",
                           callback = rosterPDF,
-                          formname = T("Volunteer Roster - Attendance")
+                          formname = str(T("Volunteer Roster - Attendance"))
                           )
                 if not r.http:
                     # Async

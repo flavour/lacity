@@ -96,17 +96,17 @@ def person():
                              ],
               )
 
-    tabs = [ (T("Basic Details"), None),
-             (T("Skills"), "skill"),
-             (T("Organizational Affiliations"), "organisation"),
-             (T("Address"), "address"),
-             (T("Contact Details"), "contact"),
-        ]
+    tabs = [(T("Basic Details"), None),
+            (T("Skills"), "skill"),
+            (T("Organizational Affiliations"), "organisation"),
+            (T("Address"), "address"),
+            (T("Contact Details"), "contact"),
+            ]
 
     rheader = lambda r: vol_pr_rheader(r, tabs=tabs)
 
     output = s3_rest_controller(module, resourcename,
-                                rheader=rheader)
+                                rheader = rheader)
 
     return output
 
@@ -1824,7 +1824,7 @@ def req():
 
     req_table = db.req_req
     configure(req_table,
-              orderby=~req_table.date)
+              orderby = ~req_table.date)
 
     type_field = req_table.type
     type_field.default = int(default_type)
@@ -1870,14 +1870,14 @@ def req():
             table.person_id.readable = table.person_id.writable = False
             # Make the component multiple=False
             add_component("vol_assignment",
-                          req_req=dict(joinby="req_id",
-                                       multiple=False))
+                          req_req = dict(joinby="req_id",
+                                         multiple=False))
     else:
         load("vol_application")
         # Volunteers can only see Public Requests
         s3.filter = (req_table.public == True)
         configure(req_table,
-                  editable=False), # We need the Controller/Table ACL to be editable to be able to add components
+                  editable = False), # We need the Controller/Table ACL to be editable to be able to add components
         person = s3_logged_in_person()
         if "application" in request.args:
             # Check for required Skills
@@ -1924,8 +1924,8 @@ def req():
             # @ToDo: Currently multiple=False will just return the .first() record even if inaccessible!
             #        That would be fixed by a filter, however then UI would break.
             add_component("vol_assignment",
-                          req_req=dict(joinby="req_id",
-                                       multiple=False))
+                          req_req = dict(joinby="req_id",
+                                         multiple=False))
 
     def prep(r):
         db.req_req.status.readable = db.req_req.status.writable = False
@@ -1941,7 +1941,8 @@ def req():
              # for a second time, such as when printing reports
              # see vol.print_assignment()
             pass
-        configure(tablename, list_fields=list_fields)
+        configure(tablename,
+                  list_fields = list_fields)
 
         # @ToDo: MH - type is always 3
         type = ( r.record and r.record.type ) or \
@@ -2080,9 +2081,8 @@ def req():
                     if assign:
                         checkin = assign.checkin
                         checkout = assign.checkout
-                        query = (req_table.id == r.id)
-                        req = db(query).select(req_table.date_required_until,
-                                                          limitby=(0, 1)).first()
+                        req = db(req_table.id == r.id).select(req_table.date_required_until,
+                                                              limitby=(0, 1)).first()
                         if req:
                             required_until = req.date_required_until
                         else:
@@ -2180,25 +2180,25 @@ def req():
                                         _style="display: block;")
                     else:
                         dsw_error = ""
-                    give2la_forms = A( T("Give2LA Registration Forms"),
-                                       _href = URL(c="static",
-                                                   f="Give2LA_Registration_Forms.pdf"),
+                    give2la_forms = A(T("Give2LA Registration Forms"),
+                                      _href = URL(c="static",
+                                                  f="Give2LA_Registration_Forms.pdf"),
                                       _target="_blank"
                                       )
-                    dsw_program_regulations = A( T("DSW Program regulations"),
-                                                 _href = "http://www.calema.ca.gov/planningandpreparedness/pages/disaster-service-worker-volunteer-program.aspx",
-                                                 _target="_blank"
-                                                 )
-                    vol_appl_conditions = SPAN( XML(T("As a volunteer working to assist disaster survivors and in disaster recovery efforts, you will be required to fill out and sign the %(give2la_forms)s. Please print these forms and bring them to the Volunteering Location. The forms are in English only.") % \
-                                                      dict(give2la_forms = give2la_forms)
-                                                      ),
-                                                BR(),
-                                                XML(T("As a Disaster Service Worker (DSW) volunteer, I agree to comply with all %(dsw_program_regulations)s including being registered by an accredited disaster council or its authorized designee, subscribing to the loyalty oath, and performing eligible disaster service duties.") %
-                                                      dict(dsw_program_regulations = dsw_program_regulations)
-                                                     ),
-                                                BR(),
-                                                T("Check here to agree to these conditions:")
+                    dsw_program_regulations = A(T("DSW Program regulations"),
+                                                _href = "http://www.calema.ca.gov/planningandpreparedness/pages/disaster-service-worker-volunteer-program.aspx",
+                                                _target="_blank"
                                                 )
+                    vol_appl_conditions = SPAN(XML(T("As a volunteer working to assist disaster survivors and in disaster recovery efforts, you will be required to fill out and sign the %(give2la_forms)s. Please print these forms and bring them to the Volunteering Location. The forms are in English only.") % \
+                                                     dict(give2la_forms = give2la_forms)
+                                                     ),
+                                               BR(),
+                                               XML(T("As a Disaster Service Worker (DSW) volunteer, I agree to comply with all %(dsw_program_regulations)s including being registered by an accredited disaster council or its authorized designee, subscribing to the loyalty oath, and performing eligible disaster service duties.") %
+                                                     dict(dsw_program_regulations = dsw_program_regulations)
+                                                    ),
+                                               BR(),
+                                               T("Check here to agree to these conditions:")
+                                               )
                     form[0][-2].append(TR(TD(LABEL(vol_appl_conditions,
                                                    _for="dsw",
                                                    _style="display: inline;",

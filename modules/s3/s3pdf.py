@@ -2832,10 +2832,12 @@ class S3PDF(S3Method):
                                     )
         else:
             canvas.setFont("Helvetica-Bold", 16)
+            # ReportLab 3.1.x crash here if self.title ('formname') is a lazyT
+            # 2.4 is fine
             canvas.drawCentredString(doc.pagesize[0] / 2.0,
                                      doc.pagesize[1] - 1.3*inch,
                                      self.title
-                                    )
+                                     )
 
         canvas.setFont("Helvetica", 7)
         now = S3DateTime.datetime_represent(datetime.utcnow(), utc=True)
