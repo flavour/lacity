@@ -32,7 +32,7 @@
 """
 
 # @todo: remove all interactive error reporting out of the _private methods, and raise exceptions instead.
-__all__ = ["S3Importer", "S3ImportJob", "S3ImportItem"]
+__all__ = ("S3Importer", "S3ImportJob", "S3ImportItem")
 
 import os
 import sys
@@ -144,7 +144,6 @@ def date_represent(date_obj):
     return date_obj.strftime("%d %B %Y, %I:%M%p")
 
 # =============================================================================
-
 class S3Importer(S3CRUD):
     """
         Transformable formats (XML, JSON, CSV) import handler

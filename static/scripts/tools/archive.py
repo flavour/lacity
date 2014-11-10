@@ -8,14 +8,20 @@
 # Load all Models
 s3mgr.model.load_all_models()
 
+from s3 import S3Importer, S3ImportJob
+S3Importer().define_upload_table()
+ij = S3ImportJob(s3mgr, None)
+ij.define_job_table()
+ij.define_item_table()
+
 # Drop data for Event-related Tables
 db.auth_event.truncate()
 db.don_collect.truncate()
 db.don_distribute.truncate()
-db.event_event.truncate()
-db.event_incident.truncate()
-db.req_fulfill.truncate()
 db.req_req.truncate()
+db.event_incident.truncate()
+db.event_event.truncate()
+db.req_fulfill.truncate()
 db.req_req_item.truncate()
 db.req_req_skill.truncate()
 db.req_surplus_item.truncate()

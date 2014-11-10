@@ -33,10 +33,11 @@
 
 """
 
-__all__ = ["AuthS3",
+__all__ = ("AuthS3",
            "S3Permission",
            "S3Audit",
-           "S3RoleManager"]
+           "S3RoleManager",
+           )
 
 import datetime
 import re
