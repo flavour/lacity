@@ -13,11 +13,6 @@ if populate > 0:
     # Load all Models to ensure all DB tables present
     s3mgr.model.load_all_models()
 
-    # Define importer tables too whilst migrate is on
-    s3base.S3Importer.define_upload_table()
-    s3base.S3ImportJob.define_job_table()
-    s3base.S3ImportJob.define_item_table()
-
     # Add core data as long as at least one populate setting is on
 
     # Scheduled Tasks
