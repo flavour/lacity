@@ -7,9 +7,3 @@
 
 # Load all Models
 s3mgr.model.load_all_models()
-
-from s3 import S3Importer, S3ImportJob
-S3Importer().define_upload_table()
-ij = S3ImportJob(s3mgr, None)
-ij.define_job_table()
-ij.define_item_table()

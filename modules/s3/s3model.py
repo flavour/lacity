@@ -138,6 +138,13 @@ class S3Model(object):
             if tablename not in db:
                 self.load(tablename)
 
+        if "s3_import_upload" not in db:
+            from s3 import S3Importer, S3ImportJob
+            S3Importer().define_upload_table()
+            ij = S3ImportJob(s3mgr, None)
+            ij.define_job_table()
+            ij.define_item_table()
+
     # -------------------------------------------------------------------------
     # Resource components
     #--------------------------------------------------------------------------

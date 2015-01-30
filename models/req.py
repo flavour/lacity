@@ -180,7 +180,8 @@ def req_tables():
                          Field("type", "integer",
                                default = 1,
                                label = T("Request Type"),
-                               represent = lambda opt: req_type_opts.get(opt, UNKNOWN_OPT),
+                               represent = lambda opt: \
+                                req_type_opts.get(opt, UNKNOWN_OPT),
                                requires = IS_IN_SET(req_type_opts, zero=None),
                                ),
                          Field("request_number", unique = True,
@@ -1366,15 +1367,6 @@ def req_tables():
         else:
             return None
 
-    #if has_module("project"):
-    #    load("project_task")
-    #    task_id = s3.task_id
-    #    tablename = "project_task_req"
-    #    table = define_table(tablename,
-    #                            task_id(),
-    #                            req_id(),
-    #                            *s3_meta_fields())
-
     # -------------------------------------------------------------------------
     def req_skill_onaccept(form):
         """
@@ -1443,45 +1435,6 @@ def req_tables():
         if not req_id:
             # @ToDo: should raise a proper HTTP status here
             raise Exception("can not get req_id")
-
-        #if has_module("project"):
-        #    # Add a Task to which the People can be assigned
-
-        #    # Get the request record
-        #    precord = db(query).select(table.request_number,
-        #                               table.purpose,
-        #                               table.priority,
-        #                               table.requester_id,
-        #                               table.approved_by_id,
-        #                               table.site_id,
-        #                               limitby=(0, 1)).first()
-        #    if not precord:
-        #        return
-        #    table = db.org_site
-        #    query = (table.id == precord.site_id)
-        #    site = db(query).select(table.location_id,
-        #                            table.organisation_id,
-        #                            limitby=(0, 1)).first()
-        #    if site:
-        #        location = site.location_id
-        #        organisation = site.organisation_id
-        #    else:
-        #        location = None
-        #        organisation = None
-
-        #    load("project_task")
-        #    table = db.project_task
-        #    task = table.insert(name=precord.request_number,
-        #                        description=precord.purpose,
-        #                        person_id=precord.requester_id,
-        #                        priority=precord.priority,
-        #                        location_id=location,
-        #                        organisation_id=organisation,
-        #                        site_id=precord.site_id)
-        #    # Add the Request as a Component to the Task
-        #    table = db.project_task_req
-        #    table.insert(task_id = task,
-        #                 req_id = req_id)
 
         if has_module("msg"):
             current.s3task.async("notify_vols", [req_id])

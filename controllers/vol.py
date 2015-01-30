@@ -328,7 +328,7 @@ def register():
     form[0][-1][0].append(INPUT(_type="button",
                                 _value=T("Cancel"),
                                 _class="wide-grey-button",
-                                _onClick="javascript: history.go(-1)"))
+                                _onClick="javascript:history.go(-1)"))
 
     formstyle = s3.crud.formstyle
 
@@ -347,7 +347,7 @@ def register():
                                 A("LA County Department of Public Health Emergency Preparedness and Response Program",
                                   _href="http://publichealth.lacounty.gov/eprp/volview.htm",
                                   _target="_blank"),
-                                _style="width: 400px;",
+                                _style="width:400px",
                                 ),
                     comment = "")
     form[0].insert(0, row)
@@ -372,7 +372,7 @@ def register():
         phone_error = DIV(form.errors.phone,
                           _id="phone__error",
                           _class="error",
-                          _style="display: block;")
+                          _style="display:block")
     else:
         phone_error = ""
     phone_widget = (INPUT(_name="phone",
@@ -449,7 +449,7 @@ def register():
         zip_error = DIV(form.errors.zip,
                         _id="zip__error",
                         _class="error",
-                        _style="display: block;")
+                        _style="display:block")
     else:
         zip_error = ""
     row = formstyle(id      = "zip",
@@ -484,14 +484,14 @@ def register():
         eighteen_error = DIV(form.errors.eighteen,
                              _id="eighteen__error",
                              _class="error",
-                             _style="display: block;")
+                             _style="display:block")
     else:
         eighteen_error = ""
     label = LABEL(#"%s:" % T("I am 18 or over"),
                   T("I am 18 or over"),
                   SPAN(" *", _class="req"),
                   _for="eighteen",
-                  _style="display: inline;",
+                  _style="display:inline",
                   _id="eighteen__label")
     widget = INPUT(_type="checkbox",
                    _value="on",
