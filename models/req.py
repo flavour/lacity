@@ -1642,7 +1642,7 @@ def req_tables():
                                   default = 2,
                                   ),
                             organisation_id("donated_by_id",
-                                            label = T("Donated By Corporation/Organisation"),
+                                            label = T("Donated By Corporation/Organization"),
                                             requires = IS_NULL_OR(IS_ONE_OF(db, "org_organisation.id",
                                                               organisation_represent,
                                                               orderby="org_organisation.name",

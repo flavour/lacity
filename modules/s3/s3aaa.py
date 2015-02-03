@@ -2224,7 +2224,7 @@ class AuthS3(Auth):
                                hidden=False,
                                system=True,
                                protected=True,
-                               role="%s (Organisation)" % name,
+                               role="%s (Organization)" % name,
                                description="All Staff of Organization %s" % name)
                 try:
                     org_role = grp_table.insert(**role)
