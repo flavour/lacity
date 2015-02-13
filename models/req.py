@@ -2050,7 +2050,7 @@ def req_tables():
                             # For reference
                             multi_skill_id(writable=False, comment=None),
                             # This should be person as we want to mark them as allocated
-                            person_id(),
+                            person_id(ondelete = "CASCADE"),
                             comments(),
                             *s3_meta_fields())
 

@@ -55,7 +55,7 @@ def vol_tables():
 
     tablename = "vol_skill"
     table = define_table(tablename,
-                         person_id(),
+                         person_id(ondelete = "CASCADE"),
                          multi_skill_id(label="%s (%s)" % (T("Skills"),
                                                            T("select all that apply"))),
                          comments(label = T("Please enter any other additional skills & information"),
@@ -103,7 +103,7 @@ def vol_tables():
 
     tablename = "vol_contact"
     table = define_table(tablename,
-                         person_id(),
+                         person_id(ondelete = "CASCADE"),
                          *(emergency_contact_fields() + s3_meta_fields()))
 
     crud_strings[tablename] = Storage(
@@ -170,7 +170,7 @@ def vol_tables():
                                readable = False,
                                writable = False, # Only for Volunteer Organisations
                                ),
-                         person_id(), # Volunteer or Team Leader (latter populated onaccept)
+                         person_id(ondelete = "CASCADE"), # Volunteer or Team Leader (latter populated onaccept)
                          organisation_id(readable = False,
                                          writable = False), # Only for Volunteer Organisations
                          human_resource_id("team_leader_id",
@@ -446,7 +446,7 @@ def vol_tables():
                                readable = not is_staff,
                                writable = False,
                                ),
-                         person_id(),
+                         person_id(ondelete = "CASCADE"),
                          # Only visible to STAFF
                          organisation_id(readable = is_staff,
                                          writable = is_staff),

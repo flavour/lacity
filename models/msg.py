@@ -73,44 +73,6 @@ def messaging_tables():
                          s3_meta_created_on())
 
     # ---------------------------------------------------------------------
-    # Message Tag - Used to tag a message to a resource
-    #tablename = "msg_tag"
-    #table = define_table(tablename,
-    #                     message_id(),
-    #                     Field("resource"),
-    #                     Field("record_uuid", # null in this field implies subscription to the entire resource
-    #                           type=s3uuid,
-    #                           length=128),
-    #                     *s3_meta_fields())
-
-    #configure(tablename,
-    #          list_fields=["id",
-    #                       "message_id",
-    #                       "record_uuid",
-    #                       "resource",
-    #                       ])
-
-    # ---------------------------------------------------------------------
-    # Settings
-    # ---------------------------------------------------------------------
-    #tablename = "msg_email_settings"
-    #table = define_table(tablename,
-    #                     Field("inbound_mail_server"),
-    #                     Field("inbound_mail_type",
-    #                           requires = IS_IN_SET(["imap", "pop3"],
-    #                                                zero=None)),
-    #                     Field("inbound_mail_ssl", "boolean"),
-    #                     Field("inbound_mail_port", "integer"),
-    #                     Field("inbound_mail_username"),
-    #                     Field("inbound_mail_password"),
-    #                     Field("inbound_mail_delete", "boolean"),
-    #                     # Also needs to be used by Auth (order issues), DB calls are overheads
-    #                     # - as easy for admin to edit source in 000_config.py as to edit DB (although an admin panel can be nice)
-    #                     #Field("outbound_mail_server"),
-    #                     #Field("outbound_mail_from"),
-    #                     *s3_timestamp())
-
-    # ---------------------------------------------------------------------
     # SMS
     # ---------------------------------------------------------------------
     tablename = "msg_setting"
@@ -124,29 +86,6 @@ def messaging_tables():
                          *s3_timestamp())
 
     # ---------------------------------------------------------------------
-    #tablename = "msg_modem_settings"
-    #table = define_table(tablename,
-    #                     #Field("account_name"), # Nametag to remember account - To be used later
-    #                     Field("modem_port"),
-    #                     Field("modem_baud", "integer", default = 115200),
-    #                     Field("enabled", "boolean", default = True),
-    #                     #Field("preference", "integer", default = 5), To be used later
-    #                     *s3_timestamp())
-
-    # ---------------------------------------------------------------------
-    #tablename = "msg_api_settings"
-    #table = define_table(tablename,
-    #                     Field("url",
-    #                           default = "https://api.clickatell.com/http/sendmsg"),
-    #                     Field("parameters",
-    #                           default="user=yourusername&password=yourpassword&api_id=yourapiid"),
-    #                     Field("message_variable", "string", default = "text"),
-    #                     Field("to_variable", "string", default = "to"),
-    #                     Field("enabled", "boolean", default = True),
-    #                     #Field("preference", "integer", default = 5), To be used later
-    #                     *s3_timestamp())
-
-    # ---------------------------------------------------------------------
     tablename = "msg_smtp_to_sms_settings"
     table = define_table(tablename,
                          #Field("account_name"), # Nametag to remember account - To be used later
@@ -155,13 +94,6 @@ def messaging_tables():
                          Field("enabled", "boolean", default = True),
                          #Field("preference", "integer", default = 5), To be used later
                          *s3_timestamp())
-
-    # ---------------------------------------------------------------------
-    #tablename = "msg_tropo_settings"
-    #table = define_table(tablename,
-    #                     Field("token_messaging"),
-    #                     #Field("token_voice"),
-    #                     *s3_timestamp())
 
     # ---------------------------------------------------------------------
     # Outbound Messages
@@ -214,50 +146,6 @@ def messaging_tables():
                            "status",
                            "log",
                            ])
-
-    # ---------------------------------------------------------------------
-    # Tropo Scratch pad for outbound messaging
-    #tablename = "msg_tropo_scratch"
-    #table = define_table(tablename,
-    #                     Field("row_id","integer"),
-    #                     Field("message_id","integer"),
-    #                     Field("recipient"),
-    #                     Field("message"),
-    #                     Field("network"),
-    #                     )
-
-    # ---------------------------------------------------------------------
-    # Inbound Messages
-    # ---------------------------------------------------------------------
-    # Channel - For inbound messages this tells which channel the message came in from.
-    #tablename = "msg_channel"
-    #table = define_table(tablename,
-    #                     message_id(),
-    #                     Field("pr_message_method",
-    #                           length=32,
-    #                           requires = IS_IN_SET(msg_contact_method_opts,
-    #                                                zero=None),
-    #                           default = "EMAIL"),
-    #                     Field("log"),
-    #                     *s3_meta_fields())
-
-    # ---------------------------------------------------------------------
-    # Status
-    #tablename = "msg_email_inbound_status"
-    #table = define_table(tablename,
-    #                        Field("status"),
-    #                        )
-
-    # ---------------------------------------------------------------------
-    # SMS store for persistence and scratch pad for combining incoming xform chunks
-    #tablename = "msg_xforms_store"
-    #table = define_table(tablename,
-    #                     Field("sender", "string", length = 20),
-    #                     Field("fileno", "integer"),
-    #                     Field("totalno", "integer"),
-    #                     Field("partno", "integer"),
-    #                     Field("message", "string", length = 160),
-    #                     )
 
     # =====================================================================
     def msg_compose(redirect_module = "msg",
@@ -336,77 +224,6 @@ def messaging_tables():
                     title = T(title_name))
 
     # ---------------------------------------------------------------------
-    # Twitter
-    # ---------------------------------------------------------------------
-    #tablename = "msg_twitter_settings"
-    #table = define_table(tablename,
-    #                     Field("pin"),
-    #                     Field("oauth_key",
-    #                           readable = False, writable = False),
-    #                     Field("oauth_secret",
-    #                           readable = False, writable = False),
-    #                     Field("twitter_account", writable = False),
-    #                     *s3_timestamp())
-
-    #def twitter_settings_onvalidation(form):
-    #    """ Complete oauth: take tokens from session + pin from form, and do the 2nd API call to Twitter """
-    #    if form.vars.pin and session.s3.twitter_request_key and session.s3.twitter_request_secret:
-    #        try:
-    #            import tweepy
-    #        except:
-    #            raise HTTP(501, body=T("Can't import tweepy"))
-
-    #        oauth = tweepy.OAuthHandler(deployment_settings.twitter.oauth_consumer_key,
-    #                                    deployment_settings.twitter.oauth_consumer_secret)
-    #        oauth.set_request_token(session.s3.twitter_request_key, session.s3.twitter_request_secret)
-    #        try:
-    #            oauth.get_access_token(form.vars.pin)
-    #            form.vars.oauth_key = oauth.access_token.key
-    #            form.vars.oauth_secret = oauth.access_token.secret
-    #            twitter = tweepy.API(oauth)
-    #            form.vars.twitter_account = twitter.me().screen_name
-    #            form.vars.pin = "" # we won't need it anymore
-    #            return
-    #        except tweepy.TweepError:
-    #            session.error = T("Settings were reset because authenticating with Twitter failed")
-    #    # Either user asked to reset, or error - clear everything
-    #    for k in ["oauth_key", "oauth_secret", "twitter_account"]:
-    #        form.vars[k] = None
-    #    for k in ["twitter_request_key", "twitter_request_secret"]:
-    #        session.s3[k] = ""
-
-    #configure(tablename,
-    #          onvalidation=twitter_settings_onvalidation)
-
-    # ---------------------------------------------------------------------
-    # Twitter Search Queries
-    #tablename = "msg_twitter_search"
-    #table = define_table(tablename,
-    #                      Field("search_query", length = 140),
-    #                      )
-    # ---------------------------------------------------------------------
-    #resourcename = "twitter_search_results"
-    #tablename = "msg_twitter_search_results"
-    #table = define_table(tablename,
-    #                     Field("tweet", length=140),
-    #                     Field("posted_by"),
-    #                     Field("posted_at"),
-    #                     Field("twitter_search", db.msg_twitter_search),
-    #                     )
-    #table.twitter_search.requires = IS_ONE_OF(db, "twitter_search.search_query")
-    #table.twitter_search.represent = lambda id: db(db.msg_twitter_search.id == id).select(db.msg_twitter_search.search_query, limitby = (0,1)).first().search_query
-
-    #add_component(table, msg_twitter_search="twitter_search")
-
-    #configure(tablename,
-    #         list_fields=["id",
-    #                      "tweet",
-    #                      "posted_by",
-    #                      "posted_at",
-    #                      "twitter_search",
-    #                      ])
-
-    # ---------------------------------------------------------------------
     # Pass variables back to global scope (s3.*)
     return dict(msg_compose=msg_compose,
                 message_id=message_id)
@@ -414,59 +231,11 @@ def messaging_tables():
 # Provide a handle to this load function
 loader(messaging_tables,
        "msg_setting",
-       #"msg_email_settings",
-       #"msg_modem_settings",
        "msg_smtp_to_sms_settings",
-       #"msg_tropo_settings",
-       #"msg_twitter_settings",
        "msg_log",
        "msg_limit",
-       #"msg_tag",
-       #"msg_channel",
        "msg_outbox",
        )
-
-# =========================================================================
-# @ToDo: Use msg.CONTACT_OPTS
-#msg_subscription_mode_opts = {1:T("Email"),
-#                              #2:T("SMS"),
-#                              #3:T("Email and SMS")
-#                              }
-# @ToDo: Move this to being a component of the Saved Search
-#        (so that each search can have it's own subscription options)
-# @ToDo: Make Conditional
-# @ToDo: CRUD Strings
-#tablename = "msg_subscription"
-#table = define_table(tablename,
-#                     Field("user_id","integer",
-#                           default = auth.user_id,
-#                           requires = IS_NOT_IN_DB(db, "msg_subscription.user_id"),
-#                           readable = False,
-#                           writable = False
-#                           ),
-#                     Field("subscribe_mode","integer",
-#                           default = 1,
-#                           represent = lambda opt: \
-#                             msg_subscription_mode_opts.get(opt, None),
-#                           readable = False,
-#                           requires = IS_IN_SET(msg_subscription_mode_opts,
-#                                                zero=None)
-#                           ),
-#                     Field("subscription_frequency",
-#                           requires = IS_IN_SET(["daily",
-#                                                 "weekly",
-#                                                 "monthly"]),
-#                           default = "daily",
-#                          ),
-#                     person_id(label = T("Person"),
-#                               default = s3_logged_in_person()),
-#                     *s3_timestamp())
-
-#configure("msg_subscription",
-#          list_fields=["subscribe_mode",
-#                       "subscription_frequency"])
-
-#add_component("msg_subscription", pr_person="person_id")
 
 # =============================================================================
 # Tasks to be callable async

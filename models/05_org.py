@@ -721,64 +721,6 @@ _table_user.site_id.comment = DIV(_class="tooltip",
                                                        T("This setting can only be controlled by the Administrator.")))
 
 # =============================================================================
-# Rooms (for Sites)
-# @ToDo: Validate to ensure that rooms are unique per facility
-#
-#tablename = "org_room"
-#table = define_table(tablename,
-#                     site_id, # site_id
-#                     Field("name", length=128, notnull=True),
-#                     *s3_meta_fields())
-
-# CRUD strings
-#ADD_ROOM = T("Add Room")
-#LIST_ROOMS = T("List Rooms")
-#s3.crud_strings[tablename] = Storage(
-#    title_create = ADD_ROOM,
-#    title_display = T("Room Details"),
-#    title_list = LIST_ROOMS,
-#    title_update = T("Edit Room"),
-#    title_search = T("Search Rooms"),
-#    subtitle_create = T("Add New Room"),
-#    subtitle_list = T("Rooms"),
-#    label_list_button = LIST_ROOMS,
-#    label_create_button = ADD_ROOM,
-#    label_delete_button = T("Delete Room"),
-#    msg_record_created = T("Room added"),
-#    msg_record_modified = T("Room updated"),
-#    msg_record_deleted = T("Room deleted"),
-#    msg_list_empty = T("No Rooms currently registered"))
-
-#room_comment = DIV(A(ADD_ROOM,
-#                     _class="colorbox",
-#                     _href=URL(c="org", f="room",
-#                               args="create",
-#                               vars=dict(format="popup")),
-#                     _target="top",
-#                     _title=ADD_ROOM),
-#                   DIV( _class="tooltip",
-#                        _title="%s|%s" % (ADD_ROOM,
-#                                          T("Select a Room from the list or click 'Add Room'"))),
-#                   # Filters Room based on site
-#                   SCRIPT("""S3FilterFieldChange({
-#                                 'FilterField':   'site_id',
-#                                 'Field':         'room_id',
-#                                 'FieldPrefix':   'org',
-#                                 'FieldResource': 'room',
-#                                 });""")
-#                    )
-
-# Reusable field for other tables to reference
-#room_id = S3ReusableField("room_id", db.org_room, sortby="name",
-#                          requires = IS_NULL_OR(IS_ONE_OF(db, "org_room.id", "%(name)s")),
-#                          represent = lambda id: \
-#                            (id and [db(db.org_room.id == id).select(db.org_room.name,
-#                                                                     limitby=(0, 1)).first().name] or [NONE])[0],
-#                          label = T("Room"),
-#                          comment = room_comment,
-#                          ondelete = "SET NULL")
-
-# =============================================================================
 # Offices / Facilities
 #
 org_office_type_opts = {    # @ToDo: Migrate these to constants: s3.OFFICE_TYPE
