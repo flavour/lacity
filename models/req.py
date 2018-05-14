@@ -2046,13 +2046,13 @@ def req_tables():
 
     tablename = "req_commit_person"
     table = define_table(tablename,
-                            commit_id(),
-                            # For reference
-                            multi_skill_id(writable=False, comment=None),
-                            # This should be person as we want to mark them as allocated
-                            person_id(ondelete = "CASCADE"),
-                            comments(),
-                            *s3_meta_fields())
+                         commit_id(),
+                         # For reference
+                         multi_skill_id(writable=False, comment=None),
+                         # This should be person as we want to mark them as allocated
+                         person_id(ondelete = "CASCADE"),
+                         comments(),
+                         *s3_meta_fields())
 
     # CRUD strings
     ADD_COMMIT_PERSON = T("Add Person to Commitment")
@@ -2110,56 +2110,54 @@ def req_tables():
 
     tablename = "req_fulfill"
     table = define_table(tablename,
-                            req_id(),
-                            human_resource_id("accepted_by_id",
-                                              label = T("Accepted by"),
-                                              comment = DIV( _class="tooltip",
-                                                             _title="%s|%s" % (T("Accepted by"),
-                                                                               T("EOC Staff who accepts the donation and coordinates its delivery.")
-                                                                              )
-                                                            ),
-                                              ),
-                            Field("datetime_fulfill",
-                                  "datetime",
-                                  label = T("Date Received"), # Could be T("Date Delivered") - make deployment_setting
-                                  requires = [IS_EMPTY_OR(
-                                              IS_UTC_DATETIME_IN_RANGE(
-                                                maximum=request.utcnow,
-                                                error_message="%s %%(max)s!" %
-                                                    T("Enter a valid past date")))],
-                                  widget = S3DateTimeWidget(past=8760, # Hours, so 1 year
-                                                            future=0),
-                                  represent = s3_utc_represent,
-                                  ),
-                            Field( "quantity_fulfill",
-                                   "double",
-                                   label = T("Quantity Received"),
-                                   represent = lambda quantity_fulfil: \
-                                    req_quantity_represent(quantity_fulfil,
-                                                           "fulfil"),
-                                   default = 0,
-                                   writable = quantities_writable),
-
-                            human_resource_id("fulfill_by_id",
-                                              label = T("Delivery of Donation Received By"),
-                                              # @ToDo: Set this in Update forms? Dedicated 'Receive' button?
-                                              # (Definitely not in Create forms)
-                                              #default = s3_logged_in_human_resource()
-                                              ),
-                            Field("datetime_returned",
-                                  "datetime",
-                                  label = T("Date+Time Returned"), # Could be T("Date Delivered") - make deployment_setting
-                                  requires = [IS_EMPTY_OR(
-                                              IS_UTC_DATETIME_IN_RANGE(
-                                                maximum=request.utcnow,
-                                                error_message="%s %%(max)s!" %
-                                                    T("Enter a valid past date")))],
-                                  widget = S3DateTimeWidget(past=8760, # Hours, so 1 year
-                                                            future=0),
-                                  represent = s3_utc_represent,
-                                  ),
-                            comments(),
-                            *s3_meta_fields())
+                         req_id(),
+                         human_resource_id("accepted_by_id",
+                                           label = T("Accepted by"),
+                                           comment = DIV(_class="tooltip",
+                                                         _title="%s|%s" % (T("Accepted by"),
+                                                                           T("EOC Staff who accepts the donation and coordinates its delivery.")
+                                                                           )
+                                                         ),
+                                           ),
+                         Field("datetime_fulfill",
+                               "datetime",
+                               label = T("Date Received"), # Could be T("Date Delivered") - make deployment_setting
+                               represent = s3_utc_represent,
+                               requires = [IS_EMPTY_OR(
+                                           IS_UTC_DATETIME_IN_RANGE(
+                                             maximum=request.utcnow,
+                                             error_message="%s %%(max)s!" %
+                                                 T("Enter a valid past date")))],
+                               widget = S3DateTimeWidget(past=8760, # Hours, so 1 year
+                                                         future=0),
+                               ),
+                         Field("quantity_fulfill", "double",
+                               default = 0,
+                               label = T("Quantity Received"),
+                               represent = lambda quantity_fulfil: \
+                                req_quantity_represent(quantity_fulfil,
+                                                       "fulfil"),
+                               writable = quantities_writable,
+                               ),
+                         human_resource_id("fulfill_by_id",
+                                           label = T("Delivery of Donation Received By"),
+                                           # @ToDo: Set this in Update forms? Dedicated 'Receive' button?
+                                           # (Definitely not in Create forms)
+                                           #default = s3_logged_in_human_resource()
+                                           ),
+                         Field("datetime_returned", "datetime",
+                               label = T("Date+Time Returned"), # Could be T("Date Delivered") - make deployment_setting
+                               represent = s3_utc_represent,
+                               requires = [IS_EMPTY_OR(
+                                           IS_UTC_DATETIME_IN_RANGE(
+                                             maximum=request.utcnow,
+                                             error_message="%s %%(max)s!" %
+                                                 T("Enter a valid past date")))],
+                               widget = S3DateTimeWidget(past=8760, # Hours, so 1 year
+                                                         future=0),
+                               ),
+                         comments(),
+                         *s3_meta_fields())
 
     # CRUD strings
     ADD_COMMIT_PERSON = T("Add Request Fulfilment Details")

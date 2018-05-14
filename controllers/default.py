@@ -783,8 +783,6 @@ def register_validation(form):
     if not request.post_vars.zip:
         form.errors.zip = T("Zip is required")
 
-    return
-
 # -----------------------------------------------------------------------------
 def register_onaccept(form):
     # Usual Registration Tasks

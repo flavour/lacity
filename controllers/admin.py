@@ -267,8 +267,7 @@ def user():
                 (r.table.registration_key != "pending")
         rows = db(query).select(r.table.id)
         restrict = [str(row.id) for row in rows]
-        response.s3.actions = [
-                                dict(label=str(UPDATE), _class="action-btn",
+        response.s3.actions = [ dict(label=str(UPDATE), _class="action-btn",
                                      url=URL(c="admin", f="user",
                                              args=["[id]", "update"])),
                                 dict(label=str(T("Roles")), _class="action-btn",
@@ -278,7 +277,7 @@ def user():
                                      url=URL(c="admin", f="user",
                                              args=["[id]", "disable"]),
                                      restrict = restrict)
-                              ]
+                                ]
         # Only show the approve button if the user is currently pending
         query = (r.table.registration_key == "pending")
         rows = db(query).select(r.table.id)
@@ -314,7 +313,6 @@ def user():
 
     output = s3_rest_controller(module, resourcename)
     return output
-
 
 # -----------------------------------------------------------------------------
 @auth.s3_requires_membership(1)
@@ -390,7 +388,6 @@ def user_approve(form):
         else:
             return
 
-
 # =============================================================================
 @auth.s3_requires_membership(1)
 def acl():
@@ -441,7 +438,6 @@ def acl():
 
     output = s3_rest_controller(prefix, name)
     return output
-
 
 # -----------------------------------------------------------------------------
 def acl_represent(acl, options):
@@ -803,9 +799,6 @@ def rostermail():
 
     return s3_rest_controller("vol", resourcename)
 
-
-
-
 # =============================================================================
 # Deprecated Code below here
 # =============================================================================
@@ -823,7 +816,6 @@ def import_csv_data():
         session.error = T("Unable to parse CSV file!")
     redirect(URL(f="import_data"))
 
-
 # -----------------------------------------------------------------------------
 @auth.s3_requires_membership(1)
 def import_data():
@@ -834,7 +826,6 @@ def import_data():
     title = T("Import Data")
     return dict(title=title)
 
-
 # -----------------------------------------------------------------------------
 @auth.requires_login()
 def export_data():
@@ -844,7 +835,6 @@ def export_data():
     """
     title = T("Export Data")
     return dict(title=title)
-
 
 # -----------------------------------------------------------------------------
 @auth.s3_requires_membership(1)
@@ -864,7 +854,6 @@ def export_csv():
     filename = "%s_database.csv" % (request.env.server_name)
     response.headers["Content-disposition"] = "attachment; filename=%s" % filename
     return output.read()
-
 
 # =============================================================================
 @auth.s3_requires_membership(1)
@@ -902,7 +891,6 @@ def group():
 
     s3mgr.configure(tablename, main="role")
     return s3_rest_controller(prefix, resourcename)
-
 
 # -----------------------------------------------------------------------------
 @auth.s3_requires_membership(1)
@@ -943,7 +931,6 @@ def membership():
 
     s3mgr.configure(tablename, main="user_id")
     return s3_rest_controller(prefix, resourcename)
-
 
 # -----------------------------------------------------------------------------
 @auth.s3_requires_membership(1)
@@ -1023,7 +1010,6 @@ def usergroup():
         data["m_%s" % key] = request.vars[key]
 
     return dict(data=data, records=records, form=form)
-
 
 # -----------------------------------------------------------------------------
 @auth.s3_requires_membership(1)
@@ -1116,7 +1102,6 @@ def users():
                        form=form))
     return output
 
-
 # -----------------------------------------------------------------------------
 def group_dupes(form, page, arg):
     """
@@ -1132,7 +1117,6 @@ def group_dupes(form, page, arg):
     if items:
         session.error = T("User already has this role")
         redirect(URL(page, args=arg))
-
 
 # -----------------------------------------------------------------------------
 @auth.s3_requires_membership(1)
@@ -1156,7 +1140,6 @@ def group_remove_users():
     #crud.settings.update_onaccept = lambda form: shn_audit_update(form, "membership", "html")
     session.flash = T("Users removed")
     redirect(URL(f="users", args=[group]))
-
 
 # -----------------------------------------------------------------------------
 @auth.s3_requires_membership(1)
@@ -1241,7 +1224,6 @@ def groups():
                        form=form))
     return output
 
-
 # -----------------------------------------------------------------------------
 @auth.s3_requires_membership(1)
 def user_remove_groups():
@@ -1265,7 +1247,6 @@ def user_remove_groups():
     #crud.settings.update_onaccept = lambda form: shn_audit_update(form, "membership", "html")
     session.flash = T("Groups removed")
     redirect(URL(f="groups", args=[user]))
-
 
 # =============================================================================
 @auth.s3_requires_membership(1)
@@ -1305,7 +1286,6 @@ def setting():
 
     output = s3_rest_controller("s3", resourcename, list_btn=None)
     return output
-
 
 # =============================================================================
 @auth.s3_requires_membership(1)
@@ -1444,7 +1424,6 @@ def theme_apply(form):
         session.error = INVALIDREQUEST
         redirect(URL(r=request))
 
-
 # -----------------------------------------------------------------------------
 def theme_check(form):
     """
@@ -1482,7 +1461,6 @@ def theme_check(form):
     #    return
     # Validation passed
     return
-
 
 # END =========================================================================
 

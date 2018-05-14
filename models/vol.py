@@ -1215,7 +1215,7 @@ def vol_tables():
             #cell4.append([pdf.addParagraph(heading, append=False), ""])
             #heading = "<b>%s</b>" % lbl_volunteer
             cell4.append([pdf.addParagraph("", append=False),
-                          pdf.addParagraph("<u><b>%s</u></b>" %vol_name, append=False)])
+                          pdf.addParagraph("<u><b>%s</b></u>" % vol_name, append=False)])
             heading = "<b>%s</b>" % lbl_report_to
             cell4.append([pdf.addParagraph(heading, append=False),
                           pdf.addParagraph(name, append=False)])
